@@ -96,6 +96,72 @@ extension Int16: PackProtocol {
 
 }
 
+extension UInt8 {
+
+    func pack() throws -> [Byte] {
+        return [ self ]
+    }
+
+    static func unpack(_ bytes: [Byte]) throws -> UInt8 {
+        if bytes.count != 1 {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        return bytes[0]
+    }
+}
+
+extension UInt16 {
+
+    func pack() throws -> [Byte] {
+        var i: UInt16 = UInt16(self).bigEndian
+        let data = NSData(bytes: &i, length: MemoryLayout<UInt16>.size)
+        let length = data.length
+
+        var bytes = [Byte](repeating: 0, count: length)
+        data.getBytes(&bytes, length: length)
+        return bytes
+    }
+
+    static func unpack(_ bytes: [Byte]) throws -> UInt16 {
+
+        if bytes.count != 2 {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        let data = NSData(bytes: bytes, length: 2)
+        let i: UInt16 = Int.readInteger(data: data, start: 0)
+        return UInt16(bigEndian: i)
+    }
+
+}
+
+
+extension UInt32 {
+
+    func pack() throws -> [Byte] {
+        var i: UInt32 = UInt32(self).bigEndian
+        let data = NSData(bytes: &i, length: MemoryLayout<UInt32>.size)
+        let length = data.length
+
+        var bytes = [Byte](repeating: 0, count: length)
+        data.getBytes(&bytes, length: length)
+        return bytes
+    }
+
+    static func unpack(_ bytes: [Byte]) throws -> UInt32 {
+
+        if bytes.count != 4 {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        let data = NSData(bytes: bytes, length: 4)
+        let i: UInt32 = Int.readInteger(data: data, start: 0)
+        return UInt32(bigEndian: i)
+    }
+
+}
+
 extension Int32: PackProtocol {
     struct Constants {
         static let byteMarker: Byte = 0xCA
