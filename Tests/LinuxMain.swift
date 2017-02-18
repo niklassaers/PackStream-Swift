@@ -9,4 +9,5 @@ XCTMain([
      testCase(Int32Tests.allTests),
      testCase(Int64Tests.allTests),
 	 testCase(FloatTests.allTests),
+	 testCase(StringTests.allTests),
 ])
