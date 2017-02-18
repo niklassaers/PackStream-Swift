@@ -8,4 +8,5 @@ XCTMain([
      testCase(Int16Tests.allTests),
      testCase(Int32Tests.allTests),
      testCase(Int64Tests.allTests),
+	 testCase(FloatTests.allTests),
 ])
