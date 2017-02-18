@@ -5,33 +5,79 @@ import XCTest
 class ListTests: XCTestCase {
 
     func testEmptyList() throws {
-        // [] -> 90
-        XCTFail("Not implemented")
+
+        let value = List(items: [])
+        let expected: [Byte] = [0x90]
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     func testThreeSmallInts() throws {
-        // [1, 2, 3] -> 93:01:02:03
-        XCTFail("Not implemented")
+
+        let value = List(items: [Int8(1), Int8(2), Int8(3)])
+        let expected: [Byte] = [0x93, 0x01, 0x02, 0x03]
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     func testFourtySmallInts() throws {
-        // [1, 2, 3, ... 40] -> D4:28:00:01:02:03:04:05:06:07:08:09:0A:0B:0C:0D:0E:0F:10:11:12:13:14:15:16:17:18:19:1A:1B:1C:1D:1E:1F:20:21:22:23:24:25:26:27
-        XCTFail("Not implemented")
+
+        let items = Array(Int8(1)...Int8(40))
+        let value = List(items: items)
+        let expected: [Byte] = [0xD4, 0x28, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28]
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     func testTheeHetrogenousTypes() throws {
-        // [1, 2.0, "three"] -> 93:01:C1:40:00:00:00:00:00:00:00:85:74:68:72:65:65
-        XCTFail("Not implemented")
+
+        let items: [PackProtocol] = [ Int8(1), Double(2.0), "three" ]
+        let value = List(items: items)
+        let expected: [Byte] = [0x93, 0x01, 0xC1, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x85, 0x74, 0x68, 0x72, 0x65, 0x65]
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     func testListOf256Ones() throws {
-        // 256 x 0x01 -> D5 01 00 [01 x 256]
-        XCTFail("Not implemented")
+
+        let items = (0...255).map { _ in Int8(1) }
+        let value = List(items: items)
+        let expected: [Byte] = [0xD5, 0x01, 0x00] + ((0...255).map { _ in Byte(1) })
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     func testListOf65536Ones() throws {
-        // 65536 x 0x01 -> D6 00 01 00 00 [01 x 65536]
-        XCTFail("Not implemented")
+
+        let items = (0...65535).map { _ in Int8(1) }
+        let value = List(items: items)
+        let expected: [Byte] = [0xD6, 0x00, 0x01, 0x00, 0x00] + ((0...65535).map { _ in Byte(1) })
+
+        let actual: [Byte] = try value.pack()
+        XCTAssertEqual(expected, actual)
+
+        let unpackedValue = try List.unpack(actual)
+        XCTAssertEqual(value, unpackedValue)
     }
 
     static var allTests : [(String, (ListTests) -> () throws -> Void)] {

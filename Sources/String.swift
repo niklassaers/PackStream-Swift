@@ -44,7 +44,6 @@ extension String: PackProtocol {
 
     private func packShortString(_ bytes: [Byte]) throws -> [Byte] {
 
-
         let marker = Constants.shortStringMinMarker + UInt8(bytes.count)
         return [marker] + bytes
     }
@@ -89,6 +88,27 @@ extension String: PackProtocol {
             throw UnpackError.unexpectedByteMarker
         }
     }
+
+    static func sizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        guard let firstByte = bytes.first else {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        switch firstByte {
+        case Constants.shortStringMinMarker...Constants.shortStringMaxMarker:
+            return Int(firstByte) - Int(Constants.shortStringMinMarker)
+        case Constants.eightBitByteMarker:
+            return Int(try UInt8.unpack(Array(bytes[1..<2])))
+        case Constants.sixteenBitByteMarker:
+            return Int(try UInt16.unpack(Array(bytes[1..<3])))
+        case Constants.thirtytwoBitByteMarker:
+            return Int(try UInt32.unpack(Array(bytes[1..<5])))
+
+        default:
+            throw UnpackError.unexpectedByteMarker
+        }
+    }
+
 
     private static func unpackShortString(_ bytes: [Byte]) throws -> String {
 

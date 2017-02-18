@@ -3,6 +3,7 @@ import XCTest
 
 XCTMain([
      testCase(packstream_swiftTests.allTests),
+	 testCase(NullTests.allTests),
      testCase(BoolTests.allTests),
      testCase(Int8Tests.allTests),
      testCase(Int16Tests.allTests),
