@@ -125,6 +125,10 @@ extension Map: PackProtocol {
                 let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
                 key = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
+            case .map:
+                throw UnpackError.notImplementedYet
+            case .structure:
+                throw UnpackError.notImplementedYet
             }
 
             let value: PackProtocol
@@ -166,6 +170,10 @@ extension Map: PackProtocol {
                 let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
                 value = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
+            case .map:
+                throw UnpackError.notImplementedYet
+            case .structure:
+                throw UnpackError.notImplementedYet
             }
 
             if let key = key as? String {

@@ -13,6 +13,8 @@ class Packer {
         case float
         case string
         case list
+        case map
+        case structure
 
         static func typeFrom(representation: Byte) -> Representations {
             if Int(representation) <= Int(Int8.max) && Int(representation) >= Int(Int8.min) {
@@ -50,6 +52,15 @@ class Packer {
                  List.Constants.sixteenBitByteMarker,
                  List.Constants.thirtytwoBitByteMarker:
                 return .list
+            case Map.Constants.shortMapMinMarker...Map.Constants.shortMapMaxMarker,
+                 Map.Constants.eightBitByteMarker,
+                 Map.Constants.sixteenBitByteMarker,
+                 Map.Constants.thirtytwoBitByteMarker:
+                return .map
+            case Structure.Constants.shortStructureMinMarker...Structure.Constants.shortStructureMaxMarker,
+                 Structure.Constants.eightBitByteMarker,
+                 Structure.Constants.sixteenBitByteMarker:
+                return .structure
             default:
                 return .null
             }
