@@ -126,9 +126,15 @@ extension Map: PackProtocol {
                 key = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .map:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                key = try Map.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             case .structure:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                key = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             }
 
             let value: PackProtocol
@@ -171,9 +177,15 @@ extension Map: PackProtocol {
                 value = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .map:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                value = try Map.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             case .structure:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                value = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             }
 
             if let key = key as? String {
@@ -186,6 +198,108 @@ extension Map: PackProtocol {
         }
 
         return Map(dictionary: dictionary)
+    }
+
+    static func sizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        guard let firstByte = bytes.first else {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        let numberOfItems: Int
+        var position: Int
+        switch firstByte {
+        case Constants.shortMapMinMarker...Constants.shortMapMaxMarker:
+            numberOfItems = Int(firstByte) - Int(Constants.shortMapMinMarker)
+            position = 1
+        case Constants.eightBitByteMarker:
+            numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
+            position = 2
+        case Constants.sixteenBitByteMarker:
+            numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
+            position = 3
+        case Constants.thirtytwoBitByteMarker:
+            numberOfItems = Int(try UInt32.unpack(Array(bytes[1..<5])))
+            position = 5
+        default:
+            throw UnpackError.unexpectedByteMarker
+        }
+
+        for _ in 0..<numberOfItems {
+            let keyMarkerByte = bytes[position]
+            switch Packer.Representations.typeFrom(representation: keyMarkerByte) {
+            case .null:
+                position += 1
+            case .bool:
+                position += 1
+            case .int8small:
+                position += 1
+            case .int8:
+                position += 2
+            case .int16:
+                position += 3
+            case .int32:
+                position += 5
+            case .int64:
+                position += 9
+            case .float:
+                position += 9
+            case .string:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try String.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .list:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try List.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .map:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .structure:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            }
+
+            let valueMarkerByte = bytes[position]
+            switch Packer.Representations.typeFrom(representation: valueMarkerByte) {
+            case .null:
+                position += 1
+            case .bool:
+                position += 1
+            case .int8small:
+                position += 1
+            case .int8:
+                position += 2
+            case .int16:
+                position += 3
+            case .int32:
+                position += 5
+            case .int64:
+                position += 9
+            case .float:
+                position += 9
+            case .string:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try String.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .list:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try List.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .map:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            case .structure:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
+            }
+
+        }
+
+        return position
     }
 }
 

@@ -191,9 +191,15 @@ extension List: PackProtocol {
                 item = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .map:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position..<(position+length)])
+                item = try Map.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             case .structure:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position..<(position+length)])
+                item = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                position += size
             }
 
             items.append(item)
@@ -254,9 +260,13 @@ extension List: PackProtocol {
                 let size = try List.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             case .map:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
             case .structure:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
             }
         }
 

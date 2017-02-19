@@ -65,8 +65,8 @@ extension Structure: Equatable {
                 return false
             }
 
-            if  let l = lhs.items[i] as? Structure,
-                let r = rhs.items[i] as? Structure,
+            if  let l = lhs.items[i] as? List,
+                let r = rhs.items[i] as? List,
                 l != r {
                 return false
             }
@@ -188,13 +188,19 @@ extension Structure: PackProtocol {
                 position += markerLength + size
             case .list:
                 let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
+                item = try List.unpack(Array(bytes[position..<(position+size)]))
+                position += size
+            case .map:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position..<(position+length)])
+                item = try Map.unpack(Array(bytes[position..<(position+size)]))
+                position += size
+            case .structure:
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
                 let size = try Structure.sizeFor(bytes: bytes[position..<(position+length)])
                 item = try Structure.unpack(Array(bytes[position..<(position+size)]))
                 position += size
-            case .map:
-                throw UnpackError.notImplementedYet
-            case .structure:
-                throw UnpackError.notImplementedYet
             }
 
             items.append(item)
@@ -252,9 +258,13 @@ extension Structure: PackProtocol {
                 let size = try List.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             case .map:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
             case .structure:
-                throw UnpackError.notImplementedYet
+                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                position += size
             }
         }
 
