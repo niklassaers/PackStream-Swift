@@ -73,6 +73,12 @@ extension List: Equatable {
                 l != r {
                 return false
             }
+
+            if  let l = lhs.items[i] as? Map,
+                let r = rhs.items[i] as? Map,
+                l != r {
+                return false
+            }
         }
 
         return true
@@ -150,7 +156,7 @@ extension List: PackProtocol {
             switch Packer.Representations.typeFrom(representation: markerByte) {
             case .null:
                 item = Null()
-                break
+                position += 1
             case .bool:
                 item = try Bool.unpack([markerByte])
                 position += 1
@@ -174,8 +180,9 @@ extension List: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.count > position + 9 ? 9 : bytes.count - position
-                let size = try String.sizeFor(bytes: bytes[position..<(position+length)])
-                let markerLength = length - size
+                let sizeBytes = bytes[position..<(position+length)]
+                let size = try String.sizeFor(bytes: sizeBytes)
+                let markerLength = try String.markerSizeFor(bytes: sizeBytes)
                 item = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
                 position += markerLength + size
             case .list:

@@ -89,10 +89,32 @@ extension String: PackProtocol {
         }
     }
 
+    static func markerSizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        guard let firstByte = bytes.first else {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+
+        switch firstByte {
+        case Constants.shortStringMinMarker...Constants.shortStringMaxMarker:
+            return 1
+        case Constants.eightBitByteMarker:
+            return 2
+        case Constants.sixteenBitByteMarker:
+            return 3
+        case Constants.thirtytwoBitByteMarker:
+            return 5
+
+        default:
+            throw UnpackError.unexpectedByteMarker
+        }
+    }
+
     static func sizeFor(bytes: ArraySlice<Byte>) throws -> Int {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
+
+        let bytes = Array(bytes)
 
         switch firstByte {
         case Constants.shortStringMinMarker...Constants.shortStringMaxMarker:

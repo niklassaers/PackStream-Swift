@@ -16,4 +16,5 @@ enum UnpackError: Error {
     case incorrectNumberOfBytes
     case incorrectValue
     case unexpectedByteMarker
+    case notImplementedYet
 }
