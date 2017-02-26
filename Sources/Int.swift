@@ -5,7 +5,7 @@ extension Int8: PackProtocol {
         static let byteMarker: Byte = 0xC8
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         switch self {
         case -0x10 ... 0x7F:
@@ -15,7 +15,7 @@ extension Int8: PackProtocol {
         }
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Int8 {
+    public static func unpack(_ bytes: [Byte]) throws -> Int8 {
 
         switch bytes.count {
         case 1:
@@ -65,7 +65,7 @@ extension Int16: PackProtocol {
         static let byteMarker: Byte = 0xC9
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         let nv: Int16 = Int16(self).bigEndian
         let uNv = UInt16(bitPattern: nv)
@@ -76,7 +76,7 @@ extension Int16: PackProtocol {
         return [ Constants.byteMarker, first, second ]
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Int16 {
+    public static func unpack(_ bytes: [Byte]) throws -> Int16 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -113,7 +113,7 @@ extension UInt8 {
 
 extension UInt16 {
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
         var i: UInt16 = UInt16(self).bigEndian
         let data = NSData(bytes: &i, length: MemoryLayout<UInt16>.size)
         let length = data.length
@@ -123,7 +123,7 @@ extension UInt16 {
         return bytes
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> UInt16 {
+    public static func unpack(_ bytes: [Byte]) throws -> UInt16 {
 
         if bytes.count != 2 {
             throw UnpackError.incorrectNumberOfBytes
@@ -149,7 +149,7 @@ extension UInt32 {
         return bytes
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> UInt32 {
+    public static func unpack(_ bytes: [Byte]) throws -> UInt32 {
 
         if bytes.count != 4 {
             throw UnpackError.incorrectNumberOfBytes
@@ -167,7 +167,7 @@ extension Int32: PackProtocol {
         static let byteMarker: Byte = 0xCA
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
         var i: Int32 = Int32(self).bigEndian
         let data = NSData(bytes: &i, length: MemoryLayout<Int32>.size)
         let length = data.length
@@ -177,7 +177,7 @@ extension Int32: PackProtocol {
         return [Constants.byteMarker] + bytes
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Int32 {
+    public static func unpack(_ bytes: [Byte]) throws -> Int32 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -201,7 +201,7 @@ extension Int64: PackProtocol {
         static let byteMarker: Byte = 0xCB
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         var i: Int64 = Int64(self).bigEndian
         let data = NSData(bytes: &i, length: MemoryLayout<Int64>.size)
@@ -212,7 +212,7 @@ extension Int64: PackProtocol {
         return [Constants.byteMarker] + bytes
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Int64 {
+    public static func unpack(_ bytes: [Byte]) throws -> Int64 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -237,7 +237,7 @@ extension Int64: PackProtocol {
 extension Int: PackProtocol {
 
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         switch self {
         case -0x10 ... 0x7F:
@@ -255,7 +255,7 @@ extension Int: PackProtocol {
         }
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Int {
+    public static func unpack(_ bytes: [Byte]) throws -> Int {
 
         switch bytes.count {
         case 1:

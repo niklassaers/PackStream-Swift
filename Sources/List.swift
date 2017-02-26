@@ -8,82 +8,12 @@ extension Sequence where Self:PackProtocol { ... }
  * but this brought to much complexity for the time being, so List for now, refactor later
  */
 
-struct List {
-    let items: [PackProtocol]
-}
-
-extension List: Equatable {
-
-    static func ==(lhs: List, rhs: List) -> Bool {
-        if lhs.items.count != rhs.items.count {
-            return false
-        }
-
-        for i in 0..<lhs.items.count {
-            let lht = type(of: lhs.items[i])
-            let rht = type(of: rhs.items[i])
-            if lht != rht {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Int8,
-                let r = rhs.items[i] as? Int8,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Int16,
-                let r = rhs.items[i] as? Int16,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Int32,
-                let r = rhs.items[i] as? Int32,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Int64,
-                let r = rhs.items[i] as? Int64,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Bool,
-                let r = rhs.items[i] as? Bool,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Double,
-                let r = rhs.items[i] as? Double,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? String,
-                let r = rhs.items[i] as? String,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? List,
-                let r = rhs.items[i] as? List,
-                l != r {
-                return false
-            }
-
-            if  let l = lhs.items[i] as? Map,
-                let r = rhs.items[i] as? Map,
-                l != r {
-                return false
-            }
-        }
-
-        return true
+public struct List {
+    public let items: [PackProtocol]
+    
+    public init(items: [PackProtocol] = []) {
+        self.items = items
     }
-
 }
 
 extension List: PackProtocol {
@@ -98,7 +28,7 @@ extension List: PackProtocol {
         static let thirtytwoBitByteMarker: Byte = 0xD6
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         switch items.count {
         case 0:
@@ -123,7 +53,7 @@ extension List: PackProtocol {
         }
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> List {
+    public static func unpack(_ bytes: [Byte]) throws -> List {
 
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
@@ -179,24 +109,24 @@ extension List: PackProtocol {
                 item = try Double.unpack(Array(bytes[position...(position+8)]))
                 position += 9
             case .string:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let sizeBytes = bytes[position..<(position+length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
                 item = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
                 position += markerLength + size
             case .list:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
                 item = try List.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .map:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try Map.sizeFor(bytes: bytes[position..<(position+length)])
                 item = try Map.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .structure:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try Structure.sizeFor(bytes: bytes[position..<(position+length)])
                 item = try Structure.unpack(Array(bytes[position..<(position+size)]))
                 position += size
@@ -207,6 +137,26 @@ extension List: PackProtocol {
 
         return List(items: items)
     }
+    
+    static func markerSizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        guard let firstByte = bytes.first else {
+            throw UnpackError.incorrectNumberOfBytes
+        }
+        
+        switch firstByte {
+        case Constants.shortListMinMarker...Constants.shortListMaxMarker:
+            return 1
+        case Constants.eightBitByteMarker:
+            return 2
+        case Constants.sixteenBitByteMarker:
+            return 3
+        case Constants.thirtytwoBitByteMarker:
+            return 5
+            
+        default:
+            throw UnpackError.unexpectedByteMarker
+        }
+    }
 
     static func sizeFor(bytes: ArraySlice<Byte>) throws -> Int {
         guard let firstByte = bytes.first else {
@@ -214,20 +164,20 @@ extension List: PackProtocol {
         }
 
         let numberOfItems: Int
-        var position: Int
+        var position: Int = bytes.startIndex
         switch firstByte {
         case Constants.shortListMinMarker...Constants.shortListMaxMarker:
             numberOfItems = Int(firstByte) - Int(Constants.shortListMinMarker)
-            position = 1
+            position += 1
         case Constants.eightBitByteMarker:
             numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
-            position = 2
+            position += 2
         case Constants.sixteenBitByteMarker:
             numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
-            position = 3
+            position += 3
         case Constants.thirtytwoBitByteMarker:
             numberOfItems = Int(try UInt32.unpack(Array(bytes[1..<5])))
-            position = 5
+            position += 5
         default:
             throw UnpackError.unexpectedByteMarker
         }
@@ -252,25 +202,101 @@ extension List: PackProtocol {
             case .float:
                 position += 9
             case .string:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
-                let size = try String.sizeFor(bytes: bytes[position...(position+length)])
-                position += size
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
+                let sizeBytes = bytes[position...(position+length)]
+                let size = try String.sizeFor(bytes: sizeBytes)
+                let markerSize = try String.markerSizeFor(bytes: sizeBytes)
+                position += size + markerSize
             case .list:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try List.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             case .map:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             case .structure:
-                let length = bytes.count > position + 9 ? 9 : bytes.count - position
+                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             }
         }
 
-        return position
+        return position - bytes.startIndex
     }
 
+}
+
+extension List: Equatable {
+    
+    public static func ==(lhs: List, rhs: List) -> Bool {
+        if lhs.items.count != rhs.items.count {
+            return false
+        }
+        
+        for i in 0..<lhs.items.count {
+            let lht = type(of: lhs.items[i])
+            let rht = type(of: rhs.items[i])
+            if lht != rht {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Int8,
+                let r = rhs.items[i] as? Int8,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Int16,
+                let r = rhs.items[i] as? Int16,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Int32,
+                let r = rhs.items[i] as? Int32,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Int64,
+                let r = rhs.items[i] as? Int64,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Bool,
+                let r = rhs.items[i] as? Bool,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Double,
+                let r = rhs.items[i] as? Double,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? String,
+                let r = rhs.items[i] as? String,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? List,
+                let r = rhs.items[i] as? List,
+                l != r {
+                return false
+            }
+            
+            if  let l = lhs.items[i] as? Map,
+                let r = rhs.items[i] as? Map,
+                l != r {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
 }

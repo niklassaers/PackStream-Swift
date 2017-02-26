@@ -7,7 +7,7 @@ extension Bool: PackProtocol {
         static let byteForTrue:  Byte = 0xC3
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
         if self == true {
             return [ Constants.byteForTrue ]
         } else {
@@ -16,7 +16,7 @@ extension Bool: PackProtocol {
     }
 
 
-    static func unpack(_ bytes: [Byte]) throws -> Bool {
+    public static func unpack(_ bytes: [Byte]) throws -> Bool {
 
         if bytes.count != 1 {
             throw UnpackError.incorrectNumberOfBytes

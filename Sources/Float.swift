@@ -6,12 +6,12 @@ extension Double: PackProtocol {  // a.k.a Float64
         static let byteMarker: Byte = 0xC1
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
         let bytes = Double.toByteArray(self).reversed()
         return [Constants.byteMarker] + bytes
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> Double {
+    public static func unpack(_ bytes: [Byte]) throws -> Double {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }

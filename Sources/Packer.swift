@@ -1,8 +1,8 @@
 import Foundation
 
-class Packer {
+public class Packer {
 
-    enum Representations {
+    public enum Representations {
         case null
         case bool
         case int8small
@@ -16,7 +16,7 @@ class Packer {
         case map
         case structure
 
-        static func typeFrom(representation: Byte) -> Representations {
+        public static func typeFrom(representation: Byte) -> Representations {
             if Int(representation) <= Int(Int8.max) && Int(representation) >= Int(Int8.min) {
                 switch Int8(representation) {
                 case -0x10 ... 0x7F:
@@ -74,7 +74,7 @@ class Packer {
         return packed
     }
 
-    func unpack(_ bytes: [Byte]) throws -> [PackProtocol] {
+    static func unpack(_ bytes: [Byte]) throws -> [PackProtocol] {
 
         return []
 

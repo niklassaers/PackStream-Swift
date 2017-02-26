@@ -11,7 +11,7 @@ extension String: PackProtocol {
         static let thirtytwoBitByteMarker: Byte = 0xD2
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
 
         guard let data = self.data(using: .utf8, allowLossyConversion: false) else {
             throw PackError.notPackable
@@ -70,7 +70,7 @@ extension String: PackProtocol {
 
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> String {
+    public static func unpack(_ bytes: [Byte]) throws -> String {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
