@@ -126,8 +126,8 @@ extension List: PackProtocol {
                 item = try Map.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             case .structure:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Structure.sizeFor(bytes: bytes[position..<(position+length)])
+                let sizeBytes = bytes[position..<(bytes.count)]
+                let size = try Structure.sizeFor(bytes: sizeBytes)
                 item = try Structure.unpack(Array(bytes[position..<(position+size)]))
                 position += size
             }
@@ -208,16 +208,16 @@ extension List: PackProtocol {
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize
             case .list:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try List.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try List.sizeFor(bytes: sizeBytes)
                 position += size
             case .map:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try Map.sizeFor(bytes: sizeBytes)
                 position += size
             case .structure:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try Structure.sizeFor(bytes: sizeBytes)
                 position += size
             }
         }

@@ -20,6 +20,13 @@ extension Structure: PackProtocol {
         static let eightBitByteMarker:     Byte = 0xDC
         static let sixteenBitByteMarker:   Byte = 0xDD
     }
+    
+    struct Types {
+        static let nodes: Byte = 0x4E
+        static let relationship: Byte = 0x52
+        static let path: Byte = 0x50
+        static let unboundRelationship: Byte = 0x72
+    }
 
     public func pack() throws -> [Byte] {
 
@@ -108,12 +115,10 @@ extension Structure: PackProtocol {
                 item = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
                 position += markerLength + size
             case .list:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
-                let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
-                let markerLength = try List.markerSizeFor(bytes: sizeBytes)
-                item = try List.unpack(Array(bytes[position..<(position+size)]))
-                position += size + markerLength
+                let sizeBytes = bytes[position..<(bytes.count)]
+                let size = try List.sizeFor(bytes: sizeBytes)
+                item = try List.unpack(Array(sizeBytes))
+                position += size
             case .map:
                 let sizeBytes = bytes[position..<bytes.count]
                 let size = try Map.sizeFor(bytes: sizeBytes)
@@ -159,21 +164,23 @@ extension Structure: PackProtocol {
         }
 
         let numberOfItems: Int
-        var position: Int
+        var position: Int = bytes.startIndex
         switch firstByte {
         case Constants.shortStructureMinMarker...Constants.shortStructureMaxMarker:
             numberOfItems = Int(firstByte) - Int(Constants.shortStructureMinMarker)
-            position = 1
+            position += 1
         case Constants.eightBitByteMarker:
             numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
-            position = 2
+            position += 2
         case Constants.sixteenBitByteMarker:
             numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
-            position = 3
+            position += 3
         default:
             throw UnpackError.unexpectedByteMarker
         }
-
+        
+        position += 1  // One byte for signature
+        
         for _ in 0..<numberOfItems {
             let markerByte = bytes[position]
             switch Packer.Representations.typeFrom(representation: markerByte) {
@@ -198,21 +205,21 @@ extension Structure: PackProtocol {
                 let size = try String.sizeFor(bytes: bytes[position...(position+length)])
                 position += size
             case .list:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try List.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try List.sizeFor(bytes: sizeBytes)
                 position += size
             case .map:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Map.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try Map.sizeFor(bytes: sizeBytes)
                 position += size
             case .structure:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Structure.sizeFor(bytes: bytes[position...(position+length)])
+                let sizeBytes = bytes[position..<bytes.endIndex]
+                let size = try Structure.sizeFor(bytes: sizeBytes)
                 position += size
             }
         }
 
-        return position
+        return position - bytes.startIndex
     }
 
 }
