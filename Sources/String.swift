@@ -3,11 +3,11 @@ import Foundation
 extension String: PackProtocol {
 
     struct Constants {
-        static let shortStringMinMarker:   Byte = 0x80
-        static let shortStringMaxMarker:   Byte = 0x8F
+        static let shortStringMinMarker: Byte = 0x80
+        static let shortStringMaxMarker: Byte = 0x8F
 
-        static let eightBitByteMarker:     Byte = 0xD0
-        static let sixteenBitByteMarker:   Byte = 0xD1
+        static let eightBitByteMarker: Byte = 0xD0
+        static let sixteenBitByteMarker: Byte = 0xD1
         static let thirtytwoBitByteMarker: Byte = 0xD2
     }
 
@@ -70,7 +70,7 @@ extension String: PackProtocol {
 
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> String {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> String {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -120,21 +120,26 @@ extension String: PackProtocol {
         case Constants.shortStringMinMarker...Constants.shortStringMaxMarker:
             return Int(firstByte) - Int(Constants.shortStringMinMarker)
         case Constants.eightBitByteMarker:
-            return Int(try UInt8.unpack(Array(bytes[1..<2])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            return Int(try UInt8.unpack(bytes[start..<end]))
         case Constants.sixteenBitByteMarker:
-            return Int(try UInt16.unpack(Array(bytes[1..<3])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 3
+            return Int(try UInt16.unpack(bytes[start..<end]))
         case Constants.thirtytwoBitByteMarker:
-            return Int(try UInt32.unpack(Array(bytes[1..<5])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 5
+            return Int(try UInt32.unpack(bytes[start..<end]))
 
         default:
             throw UnpackError.unexpectedByteMarker
         }
     }
 
+    private static func unpackShortString(_ bytes: ArraySlice<Byte>) throws -> String {
 
-    private static func unpackShortString(_ bytes: [Byte]) throws -> String {
-
-        let size = bytes[0] - Constants.shortStringMinMarker
+        let size = bytes[bytes.startIndex] - Constants.shortStringMinMarker
         if bytes.count != Int(size) + 1 {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -143,7 +148,9 @@ extension String: PackProtocol {
             return ""
         }
 
-        return try bytesToString(Array(bytes[1..<bytes.count]))
+        let start = bytes.startIndex + 1
+        let end = bytes.endIndex
+        return try bytesToString(Array(bytes[start..<end]))
     }
 
     private static func bytesToString(_ bytes: [Byte]) throws -> String {
@@ -156,9 +163,11 @@ extension String: PackProtocol {
         return string
     }
 
-    private static func unpack8BitString(_ bytes: [Byte]) throws -> String {
+    private static func unpack8BitString(_ bytes: ArraySlice<Byte>) throws -> String {
 
-        let size = try UInt8.unpack(Array(bytes[1..<2]))
+        let start = bytes.startIndex + 1
+        let end = bytes.startIndex + 2
+        let size = try UInt8.unpack(bytes[start..<end])
         if bytes.count != Int(size) + 2 {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -167,12 +176,14 @@ extension String: PackProtocol {
             return ""
         }
 
-        return try bytesToString(Array(bytes[2..<bytes.count]))
+        return try bytesToString(Array(bytes[(bytes.startIndex + 2)..<bytes.endIndex]))
     }
 
-    private static func unpack16BitString(_ bytes: [Byte]) throws -> String {
+    private static func unpack16BitString(_ bytes: ArraySlice<Byte>) throws -> String {
 
-        let size = try UInt16.unpack(Array(bytes[1..<3]))
+        let start = bytes.startIndex + 1
+        let end = bytes.startIndex + 3
+        let size = try UInt16.unpack(bytes[start..<end])
         if bytes.count != Int(size) + 3 {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -181,12 +192,14 @@ extension String: PackProtocol {
             return ""
         }
 
-        return try bytesToString(Array(bytes[3..<bytes.count]))
+        return try bytesToString(Array(bytes[(bytes.startIndex + 3)..<bytes.endIndex]))
     }
 
-    private static func unpack32BitString(_ bytes: [Byte]) throws -> String {
+    private static func unpack32BitString(_ bytes: ArraySlice<Byte>) throws -> String {
 
-        let size = try UInt32.unpack(Array(bytes[1..<5]))
+        let start = bytes.startIndex + 1
+        let end = bytes.startIndex + 5
+        let size = try UInt32.unpack(bytes[start..<end])
         if bytes.count != Int(size) + 5 {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -195,8 +208,7 @@ extension String: PackProtocol {
             return ""
         }
 
-        return try bytesToString(Array(bytes[5..<bytes.count]))
+        return try bytesToString(Array(bytes[(bytes.startIndex + 5)..<bytes.endIndex]))
     }
-
 
 }

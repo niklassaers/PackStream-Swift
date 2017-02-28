@@ -7,14 +7,14 @@ class BoolTests: XCTestCase {
     func testTrue() throws {
         let val = true
         let bytes = try val.pack()
-        let unpacked = try Bool.unpack(bytes)
+        let unpacked = try Bool.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(val, unpacked)
     }
 
     func testFalse() throws {
         let val = false
         let bytes = try val.pack()
-        let unpacked = try Bool.unpack(bytes)
+        let unpacked = try Bool.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(val, unpacked)
     }
 
@@ -22,7 +22,7 @@ class BoolTests: XCTestCase {
 
         do {
             let bytes = [ Byte(0x00) ]
-            let _ = try Bool.unpack(bytes)
+            let _ = try Bool.unpack(bytes[0..<bytes.count])
         } catch {
             return // Test success
         }

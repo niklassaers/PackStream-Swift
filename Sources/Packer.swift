@@ -74,7 +74,7 @@ public class Packer {
         return packed
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> [PackProtocol] {
+    static func unpack(_ bytes: ArraySlice<Byte>) throws -> [PackProtocol] {
 
         return []
 

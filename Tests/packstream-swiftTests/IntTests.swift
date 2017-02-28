@@ -9,7 +9,7 @@ class Int8Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(1, bytes.count)
 
-        let unpacked = try Int8.unpack(bytes)
+        let unpacked = try Int8.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -19,7 +19,7 @@ class Int8Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(2, bytes.count)
 
-        let unpacked = try Int8.unpack(bytes)
+        let unpacked = try Int8.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -29,7 +29,7 @@ class Int8Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(1, bytes.count)
 
-        let unpacked = try Int8.unpack(bytes)
+        let unpacked = try Int8.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -40,7 +40,7 @@ class Int8Tests: XCTestCase {
         XCTAssertEqual(1, bytes.count)
         XCTAssertEqual(0x2A, bytes[0])
 
-        let unpacked = try Int8.unpack(bytes)
+        let unpacked = try Int8.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -49,7 +49,7 @@ class Int8Tests: XCTestCase {
         let value: Int8 = 42
         let bytes = [ Byte(0xC8), Byte(0x2A) ]
 
-        let unpacked = try Int8.unpack(bytes)
+        let unpacked = try Int8.unpack(bytes[0..<bytes.count])
 
         XCTAssertEqual(value, unpacked)
     }
@@ -64,7 +64,7 @@ class Int8Tests: XCTestCase {
                 for value in values {
 
                     let bytes = try value.pack()
-                    let unpacked = try Int8.unpack(bytes)
+                    let unpacked = try Int8.unpack(bytes[0..<bytes.count])
                     XCTAssertEqual(value, unpacked)
                 }
             } catch {
@@ -94,7 +94,7 @@ class Int16Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(3, bytes.count)
 
-        let unpacked = try Int16.unpack(bytes)
+        let unpacked = try Int16.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -104,7 +104,7 @@ class Int16Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(3, bytes.count)
 
-        let unpacked = try Int16.unpack(bytes)
+        let unpacked = try Int16.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -117,7 +117,7 @@ class Int16Tests: XCTestCase {
         XCTAssertEqual(0x00, bytes[1])
         XCTAssertEqual(0x2A, bytes[2])
 
-        let unpacked = try Int16.unpack(bytes)
+        let unpacked = try Int16.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -130,7 +130,7 @@ class Int16Tests: XCTestCase {
         XCTAssertEqual(0x04, bytes[1])
         XCTAssertEqual(0xD2, bytes[2])
 
-        let unpacked = try Int16.unpack(bytes)
+        let unpacked = try Int16.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -143,7 +143,7 @@ class Int16Tests: XCTestCase {
                 for value in values {
 
                     let bytes = try value.pack()
-                    let unpacked = try Int16.unpack(bytes)
+                    let unpacked = try Int16.unpack(bytes[0..<bytes.count])
                     XCTAssertEqual(value, unpacked)
                 }
             } catch {
@@ -173,7 +173,7 @@ class Int32Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(5, bytes.count)
 
-        let unpacked = try Int32.unpack(bytes)
+        let unpacked = try Int32.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -183,7 +183,7 @@ class Int32Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(5, bytes.count)
 
-        let unpacked = try Int32.unpack(bytes)
+        let unpacked = try Int32.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -198,7 +198,7 @@ class Int32Tests: XCTestCase {
         XCTAssertEqual(0x00, bytes[3])
         XCTAssertEqual(0x2A, bytes[4])
 
-        let unpacked = try Int32.unpack(bytes)
+        let unpacked = try Int32.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -211,7 +211,7 @@ class Int32Tests: XCTestCase {
                 for value in values {
 
                     let bytes = try value.pack()
-                    let unpacked = try Int32.unpack(bytes)
+                    let unpacked = try Int32.unpack(bytes[0..<bytes.count])
                     XCTAssertEqual(value, unpacked)
                 }
             } catch {
@@ -240,7 +240,7 @@ class Int64Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
-        let unpacked = try Int64.unpack(bytes)
+        let unpacked = try Int64.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -250,7 +250,7 @@ class Int64Tests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
-        let unpacked = try Int64.unpack(bytes)
+        let unpacked = try Int64.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -269,7 +269,7 @@ class Int64Tests: XCTestCase {
         XCTAssertEqual(0x00, bytes[7])
         XCTAssertEqual(0x2A, bytes[8])
 
-        let unpacked = try Int64.unpack(bytes)
+        let unpacked = try Int64.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -282,7 +282,7 @@ class Int64Tests: XCTestCase {
                 for value in values {
 
                     let bytes = try value.pack()
-                    let unpacked = try Int64.unpack(bytes)
+                    let unpacked = try Int64.unpack(bytes[0..<bytes.count])
                     XCTAssertEqual(value, unpacked)
                 }
             } catch {

@@ -10,7 +10,7 @@ extension Sequence where Self:PackProtocol { ... }
 
 public struct List {
     public let items: [PackProtocol]
-    
+
     public init(items: [PackProtocol] = []) {
         self.items = items
     }
@@ -18,13 +18,12 @@ public struct List {
 
 extension List: PackProtocol {
 
-
     struct Constants {
-        static let shortListMinMarker:   Byte = 0x90
-        static let shortListMaxMarker:   Byte = 0x9F
+        static let shortListMinMarker: Byte = 0x90
+        static let shortListMaxMarker: Byte = 0x9F
 
-        static let eightBitByteMarker:     Byte = 0xD4
-        static let sixteenBitByteMarker:   Byte = 0xD5
+        static let eightBitByteMarker: Byte = 0xD4
+        static let sixteenBitByteMarker: Byte = 0xD5
         static let thirtytwoBitByteMarker: Byte = 0xD6
     }
 
@@ -53,28 +52,32 @@ extension List: PackProtocol {
         }
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> List {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> List {
 
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
 
         let size: UInt64
-        var position: Int
+        var position: Int = bytes.startIndex
 
         switch firstByte {
         case Constants.shortListMinMarker...Constants.shortListMaxMarker:
             size = UInt64(firstByte - Constants.shortListMinMarker)
-            position = 1
+            position += 1
         case Constants.eightBitByteMarker:
-            size = UInt64(try UInt8.unpack([bytes[1]]))
-            position = 2
+            size = UInt64(try UInt8.unpack([bytes[bytes.startIndex + 1]]))
+            position += 2
         case Constants.sixteenBitByteMarker:
-            size = UInt64(try UInt16.unpack(Array(bytes[1...2])))
-            position = 3
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            size = UInt64(try UInt16.unpack(bytes[start...end]))
+            position += 3
         case Constants.thirtytwoBitByteMarker:
-            size = UInt64(try UInt32.unpack(Array(bytes[1...4])))
-            position = 5
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 4
+            size = UInt64(try UInt32.unpack(bytes[start...end]))
+            position += 5
         default:
             throw UnpackError.incorrectValue
         }
@@ -94,41 +97,41 @@ extension List: PackProtocol {
                 item = try Int8.unpack([markerByte])
                 position += 1
             case .int8:
-                item = try Int8.unpack(Array(bytes[position...(position+1)]))
+                item = try Int8.unpack(bytes[position...(position + 1)])
                 position += 2
             case .int16:
-                item = try Int16.unpack(Array(bytes[position...(position+2)]))
+                item = try Int16.unpack(bytes[position...(position + 2)])
                 position += 3
             case .int32:
-                item = try Int32.unpack(Array(bytes[position...(position+4)]))
+                item = try Int32.unpack(bytes[position...(position + 4)])
                 position += 5
             case .int64:
-                item = try Int32.unpack(Array(bytes[position...(position+8)]))
+                item = try Int32.unpack(bytes[position...(position + 8)])
                 position += 9
             case .float:
-                item = try Double.unpack(Array(bytes[position...(position+8)]))
+                item = try Double.unpack(bytes[position...(position + 8)])
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
+                let sizeBytes = bytes[position..<(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
-                item = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
+                item = try String.unpack(bytes[position..<(position + markerLength + size)])
                 position += markerLength + size
             case .list:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try List.sizeFor(bytes: bytes[position..<(position+length)])
-                item = try List.unpack(Array(bytes[position..<(position+size)]))
+                let size = try List.sizeFor(bytes: bytes[position..<(position + length)])
+                item = try List.unpack(bytes[position..<(position + size)])
                 position += size
             case .map:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Map.sizeFor(bytes: bytes[position..<(position+length)])
-                item = try Map.unpack(Array(bytes[position..<(position+size)]))
+                let size = try Map.sizeFor(bytes: bytes[position..<(position + length)])
+                item = try Map.unpack(bytes[position..<(position + size)])
                 position += size
             case .structure:
-                let sizeBytes = bytes[position..<(bytes.count)]
+                let sizeBytes = bytes[position..<(bytes.endIndex)]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
-                item = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                item = try Structure.unpack(bytes[position..<(position + size)])
                 position += size
             }
 
@@ -137,12 +140,12 @@ extension List: PackProtocol {
 
         return List(items: items)
     }
-    
+
     static func markerSizeFor(bytes: ArraySlice<Byte>) throws -> Int {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
-        
+
         switch firstByte {
         case Constants.shortListMinMarker...Constants.shortListMaxMarker:
             return 1
@@ -152,7 +155,7 @@ extension List: PackProtocol {
             return 3
         case Constants.thirtytwoBitByteMarker:
             return 5
-            
+
         default:
             throw UnpackError.unexpectedByteMarker
         }
@@ -170,13 +173,19 @@ extension List: PackProtocol {
             numberOfItems = Int(firstByte) - Int(Constants.shortListMinMarker)
             position += 1
         case Constants.eightBitByteMarker:
-            numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            numberOfItems = Int(try UInt8.unpack(bytes[start..<end]))
             position += 2
         case Constants.sixteenBitByteMarker:
-            numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 3
+            numberOfItems = Int(try UInt16.unpack(bytes[start..<end]))
             position += 3
         case Constants.thirtytwoBitByteMarker:
-            numberOfItems = Int(try UInt32.unpack(Array(bytes[1..<5])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 5
+            numberOfItems = Int(try UInt32.unpack(bytes[start..<end]))
             position += 5
         default:
             throw UnpackError.unexpectedByteMarker
@@ -203,7 +212,7 @@ extension List: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position...(position+length)]
+                let sizeBytes = bytes[position...(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize
@@ -228,75 +237,75 @@ extension List: PackProtocol {
 }
 
 extension List: Equatable {
-    
+
     public static func ==(lhs: List, rhs: List) -> Bool {
         if lhs.items.count != rhs.items.count {
             return false
         }
-        
+
         for i in 0..<lhs.items.count {
             let lht = type(of: lhs.items[i])
             let rht = type(of: rhs.items[i])
             if lht != rht {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int8,
                 let r = rhs.items[i] as? Int8,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int16,
                 let r = rhs.items[i] as? Int16,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int32,
                 let r = rhs.items[i] as? Int32,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int64,
                 let r = rhs.items[i] as? Int64,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Bool,
                 let r = rhs.items[i] as? Bool,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Double,
                 let r = rhs.items[i] as? Double,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? String,
                 let r = rhs.items[i] as? String,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? List,
                 let r = rhs.items[i] as? List,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Map,
                 let r = rhs.items[i] as? Map,
                 l != r {
                 return false
             }
         }
-        
+
         return true
     }
-    
+
 }

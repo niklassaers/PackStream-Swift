@@ -4,7 +4,7 @@ extension Bool: PackProtocol {
 
     struct Constants {
         static let byteForFalse: Byte = 0xC2
-        static let byteForTrue:  Byte = 0xC3
+        static let byteForTrue: Byte = 0xC3
     }
 
     public func pack() throws -> [Byte] {
@@ -15,8 +15,7 @@ extension Bool: PackProtocol {
         }
     }
 
-
-    public static func unpack(_ bytes: [Byte]) throws -> Bool {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Bool {
 
         if bytes.count != 1 {
             throw UnpackError.incorrectNumberOfBytes

@@ -1,8 +1,8 @@
 import Foundation
 
 public struct Map {
-    let dictionary: [String: PackProtocol]
-    
+    public let dictionary: [String: PackProtocol]
+
     public init(dictionary: [String: PackProtocol]) {
         self.dictionary = dictionary
     }
@@ -10,13 +10,12 @@ public struct Map {
 
 extension Map: PackProtocol {
 
-
     struct Constants {
-        static let shortMapMinMarker:   Byte = 0xA0
-        static let shortMapMaxMarker:   Byte = 0xAF
+        static let shortMapMinMarker: Byte = 0xA0
+        static let shortMapMaxMarker: Byte = 0xAF
 
-        static let eightBitByteMarker:     Byte = 0xD8
-        static let sixteenBitByteMarker:   Byte = 0xD9
+        static let eightBitByteMarker: Byte = 0xD8
+        static let sixteenBitByteMarker: Byte = 0xD9
         static let thirtytwoBitByteMarker: Byte = 0xDA
     }
 
@@ -52,33 +51,37 @@ extension Map: PackProtocol {
         }
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Map {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Map {
 
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
 
         let size: UInt64
-        var position: Int
+        var position: Int = bytes.startIndex
 
         switch firstByte {
         case Constants.shortMapMinMarker...Constants.shortMapMaxMarker:
             size = UInt64(firstByte - Constants.shortMapMinMarker)
-            position = 1
+            position += 1
         case Constants.eightBitByteMarker:
-            size = UInt64(try UInt8.unpack([bytes[1]]))
-            position = 2
+            size = UInt64(try UInt8.unpack([bytes[bytes.startIndex + 1]]))
+            position += 2
         case Constants.sixteenBitByteMarker:
-            size = UInt64(try UInt16.unpack(Array(bytes[1...2])))
-            position = 3
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            size = UInt64(try UInt16.unpack(bytes[start...end]))
+            position += 3
         case Constants.thirtytwoBitByteMarker:
-            size = UInt64(try UInt32.unpack(Array(bytes[1...4])))
-            position = 5
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 4
+            size = UInt64(try UInt32.unpack(bytes[start...end]))
+            position += 5
         default:
             throw UnpackError.incorrectValue
         }
 
-        var dictionary = [String:PackProtocol]()
+        var dictionary = [String: PackProtocol]()
         for _ in 0..<size {
             let key: PackProtocol
             let keyMarkerByte = bytes[position]
@@ -93,41 +96,40 @@ extension Map: PackProtocol {
                 key = try Int8.unpack([keyMarkerByte])
                 position += 1
             case .int8:
-                key = try Int8.unpack(Array(bytes[position...(position+1)]))
+                key = try Int8.unpack(bytes[position...(position + 1)])
                 position += 2
             case .int16:
-                key = try Int16.unpack(Array(bytes[position...(position+2)]))
+                key = try Int16.unpack(bytes[position...(position + 2)])
                 position += 3
             case .int32:
-                key = try Int32.unpack(Array(bytes[position...(position+4)]))
+                key = try Int32.unpack(bytes[position...(position + 4)])
                 position += 5
             case .int64:
-                key = try Int32.unpack(Array(bytes[position...(position+8)]))
+                key = try Int32.unpack(bytes[position...(position + 8)])
                 position += 9
             case .float:
-                key = try Double.unpack(Array(bytes[position...(position+8)]))
+                key = try Double.unpack(bytes[position...(position + 8)])
                 position += 9
             case .string:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
-                key = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
+                key = try String.unpack(bytes[position..<(position + markerLength + size)])
                 position += markerLength + size
             case .list:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try List.sizeFor(bytes: sizeBytes)
-                key = try List.unpack(Array(bytes[position..<(position+size)]))
+                key = try List.unpack(bytes[position..<(position + size)])
                 position += size
             case .map:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Map.sizeFor(bytes: sizeBytes)
-                key = try Map.unpack(Array(bytes[position..<(position+size)]))
+                key = try Map.unpack(bytes[position..<(position + size)])
                 position += size
             case .structure:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
-                key = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                key = try Structure.unpack(bytes[position..<(position + size)])
                 position += size
             }
 
@@ -144,34 +146,34 @@ extension Map: PackProtocol {
                 value = try Int8.unpack([valueMarkerByte])
                 position += 1
             case .int8:
-                value = try Int8.unpack(Array(bytes[position...(position+1)]))
+                value = try Int8.unpack(bytes[position...(position + 1)])
                 position += 2
             case .int16:
-                value = try Int16.unpack(Array(bytes[position...(position+2)]))
+                value = try Int16.unpack(bytes[position...(position + 2)])
                 position += 3
             case .int32:
-                value = try Int32.unpack(Array(bytes[position...(position+4)]))
+                value = try Int32.unpack(bytes[position...(position + 4)])
                 position += 5
             case .int64:
-                value = try Int32.unpack(Array(bytes[position...(position+8)]))
+                value = try Int32.unpack(bytes[position...(position + 8)])
                 position += 9
             case .float:
-                value = try Double.unpack(Array(bytes[position...(position+8)]))
+                value = try Double.unpack(bytes[position...(position + 8)])
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
+                let sizeBytes = bytes[position..<(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
                 let stringEndPos = position + markerLength + size
-                value = try String.unpack(Array(bytes[position ..< stringEndPos]))
+                value = try String.unpack(bytes[position ..< stringEndPos])
                 position += markerLength + size
             case .list:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
                 if length > 0 {
-                    let size = try List.sizeFor(bytes: bytes[position..<bytes.count])
+                    let size = try List.sizeFor(bytes: bytes[position..<bytes.endIndex])
                     if size > 0 {
-                        value = try List.unpack(Array(bytes[position..<(position+size)]))
+                        value = try List.unpack(bytes[position..<(position + size)])
                         position += size
                     } else {
                         value = List(items: [])
@@ -180,14 +182,14 @@ extension Map: PackProtocol {
                     value = List(items: [])
                 }
             case .map:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Map.sizeFor(bytes: sizeBytes)
-                value = try Map.unpack(Array(bytes[position..<(position+size)]))
+                value = try Map.unpack(bytes[position..<(position + size)])
                 position += size
             case .structure:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
-                value = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                value = try Structure.unpack(bytes[position..<(position + size)])
                 position += size
             }
 
@@ -207,7 +209,7 @@ extension Map: PackProtocol {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
-        
+
         switch firstByte {
         case Constants.shortMapMinMarker...Constants.shortMapMaxMarker:
             return 1
@@ -217,7 +219,7 @@ extension Map: PackProtocol {
             return 3
         case Constants.thirtytwoBitByteMarker:
             return 5
-            
+
         default:
             throw UnpackError.unexpectedByteMarker
         }
@@ -235,13 +237,19 @@ extension Map: PackProtocol {
             numberOfItems = Int(firstByte) - Int(Constants.shortMapMinMarker)
             position += 1
         case Constants.eightBitByteMarker:
-            numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            numberOfItems = Int(try UInt8.unpack(bytes[start..<end]))
             position += 2
         case Constants.sixteenBitByteMarker:
-            numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 3
+            numberOfItems = Int(try UInt16.unpack(bytes[start..<end]))
             position += 3
         case Constants.thirtytwoBitByteMarker:
-            numberOfItems = Int(try UInt32.unpack(Array(bytes[1..<5])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 5
+            numberOfItems = Int(try UInt32.unpack(bytes[start..<end]))
             position += 5
         default:
             throw UnpackError.unexpectedByteMarker
@@ -268,7 +276,7 @@ extension Map: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position...(position+length)]
+                let sizeBytes = bytes[position...(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize
@@ -309,7 +317,7 @@ extension Map: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position...(position+length)]
+                let sizeBytes = bytes[position...(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize

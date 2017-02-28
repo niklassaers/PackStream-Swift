@@ -15,7 +15,7 @@ extension Int8: PackProtocol {
         }
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Int8 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int8 {
 
         switch bytes.count {
         case 1:
@@ -36,7 +36,7 @@ extension Int8: PackProtocol {
         }
     }
 
-    private static func unpackInt8(_ bytes: [Byte], withMarker: Bool) throws -> Int8 {
+    private static func unpackInt8(_ bytes: ArraySlice<Byte>, withMarker: Bool) throws -> Int8 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -53,7 +53,7 @@ extension Int8: PackProtocol {
                 throw UnpackError.incorrectNumberOfBytes
             }
 
-            let byte: Byte = bytes[1]
+            let byte: Byte = bytes[bytes.startIndex + 1]
             return Int8(bitPattern: byte)
         }
     }
@@ -76,7 +76,7 @@ extension Int16: PackProtocol {
         return [ Constants.byteMarker, first, second ]
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Int16 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int16 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -89,7 +89,7 @@ extension Int16: PackProtocol {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let data = NSData(bytes: bytes, length: 3)
+        let data = NSData(bytes: Array(bytes), length: 3)
         let i: Int16 = Int.readInteger(data: data, start: 1)
         return Int16(bigEndian: i)
     }
@@ -102,12 +102,12 @@ extension UInt8 {
         return [ self ]
     }
 
-    static func unpack(_ bytes: [Byte]) throws -> UInt8 {
+    static func unpack(_ bytes: ArraySlice<Byte>) throws -> UInt8 {
         if bytes.count != 1 {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        return bytes[0]
+        return bytes[bytes.startIndex]
     }
 }
 
@@ -123,19 +123,18 @@ extension UInt16 {
         return bytes
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> UInt16 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> UInt16 {
 
         if bytes.count != 2 {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let data = NSData(bytes: bytes, length: 2)
+        let data = NSData(bytes: Array(bytes), length: 2)
         let i: UInt16 = Int.readInteger(data: data, start: 0)
         return UInt16(bigEndian: i)
     }
 
 }
-
 
 extension UInt32 {
 
@@ -149,13 +148,13 @@ extension UInt32 {
         return bytes
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> UInt32 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> UInt32 {
 
         if bytes.count != 4 {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let data = NSData(bytes: bytes, length: 4)
+        let data = NSData(bytes: Array(bytes), length: 4)
         let i: UInt32 = Int.readInteger(data: data, start: 0)
         return UInt32(bigEndian: i)
     }
@@ -177,7 +176,7 @@ extension Int32: PackProtocol {
         return [Constants.byteMarker] + bytes
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Int32 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int32 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -190,7 +189,7 @@ extension Int32: PackProtocol {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let data = NSData(bytes: bytes, length: 5)
+        let data = NSData(bytes: Array(bytes), length: 5)
         let i: Int32 = Int.readInteger(data: data, start: 1)
         return Int32(bigEndian: i)
     }
@@ -212,7 +211,7 @@ extension Int64: PackProtocol {
         return [Constants.byteMarker] + bytes
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Int64 {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int64 {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -225,17 +224,14 @@ extension Int64: PackProtocol {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let data = NSData(bytes: bytes, length: 9)
+        let data = NSData(bytes: Array(bytes), length: 9)
         let i: Int64 = Int.readInteger(data: data, start: 1)
         return Int64(bigEndian: i)
     }
 
 }
 
-
-
 extension Int: PackProtocol {
-
 
     public func pack() throws -> [Byte] {
 
@@ -255,7 +251,7 @@ extension Int: PackProtocol {
         }
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Int {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int {
 
         switch bytes.count {
         case 1:
@@ -273,11 +269,10 @@ extension Int: PackProtocol {
         }
     }
 
-    static func readInteger<T : Integer>(data : NSData, start : Int) -> T {
-        var d : T = 0
+    static func readInteger<T: Integer>(data: NSData, start: Int) -> T {
+        var d: T = 0
         data.getBytes(&d, range: NSRange(location: start, length: MemoryLayout<T>.size))
         return d
     }
-
 
 }

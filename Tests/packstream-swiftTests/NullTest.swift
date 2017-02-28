@@ -7,7 +7,7 @@ class NullTests: XCTestCase {
     func testNull() throws {
         let val = Null()
         let bytes = try val.pack()
-        let unpacked = try Null.unpack(bytes)
+        let unpacked = try Null.unpack(bytes[0..<bytes.count])
         XCTAssert(type(of: val) == type(of: unpacked))
     }
 
@@ -15,7 +15,7 @@ class NullTests: XCTestCase {
 
         do {
             let bytes = [ Byte(0x00) ]
-            let _ = try Null.unpack(bytes)
+            let _ = try Null.unpack(bytes[0..<bytes.count])
         } catch {
             return // Test success
         }

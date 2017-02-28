@@ -11,7 +11,7 @@ extension Double: PackProtocol {  // a.k.a Float64
         return [Constants.byteMarker] + bytes
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Double {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Double {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -24,7 +24,9 @@ extension Double: PackProtocol {  // a.k.a Float64
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        let array = Array(bytes[1...8].reversed())
+        let start = bytes.startIndex + 1
+        let end = bytes.startIndex + 8
+        let array = Array(bytes[start...end].reversed())
         let v: Double = Double.fromByteArray(array, Double.self)
         return v
     }

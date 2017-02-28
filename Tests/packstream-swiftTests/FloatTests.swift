@@ -11,7 +11,7 @@ class FloatTests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
-        let unpacked = try Double.unpack(bytes)
+        let unpacked = try Double.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -21,7 +21,7 @@ class FloatTests: XCTestCase {
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
-        let unpacked = try Double.unpack(bytes)
+        let unpacked = try Double.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
     }
 
@@ -40,7 +40,7 @@ class FloatTests: XCTestCase {
         XCTAssertEqual(0x00, bytes[7])
         XCTAssertEqual(0x00, bytes[8])
 
-        let unpacked = try Float64.unpack(bytes)
+        let unpacked = try Float64.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
 
     }
@@ -59,7 +59,7 @@ class FloatTests: XCTestCase {
         XCTAssertEqual(0x2D, bytes[7])
         XCTAssertEqual(0x18, bytes[8])
 
-        let unpacked = try Float64.unpack(bytes)
+        let unpacked = try Float64.unpack(bytes[0..<bytes.count])
         XCTAssertEqual(value, unpacked)
 
     }
@@ -68,8 +68,8 @@ class FloatTests: XCTestCase {
         let pos: [Byte] = [0xC1, 0x3F, 0xF1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9A]
         let neg: [Byte] = [0xC1, 0xBF, 0xF1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9A]
 
-        XCTAssertEqual(Double(1.1), try Double.unpack(pos))
-        XCTAssertEqual(Double(-1.1), try Double.unpack(neg))
+        XCTAssertEqual(Double(1.1), try Double.unpack(pos[0..<pos.count]))
+        XCTAssertEqual(Double(-1.1), try Double.unpack(neg[0..<neg.count]))
     }
 
     static var allTests : [(String, (FloatTests) -> () throws -> Void)] {

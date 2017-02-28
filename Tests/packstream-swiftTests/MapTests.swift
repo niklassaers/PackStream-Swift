@@ -11,7 +11,7 @@ class MapTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Map.unpack(actual)
+        let unpackedValue = try Map.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -23,7 +23,7 @@ class MapTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Map.unpack(actual)
+        let unpackedValue = try Map.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -42,7 +42,7 @@ class MapTests: XCTestCase {
             }
         }
 
-        let unpackedValue = try Map.unpack(actual)
+        let unpackedValue = try Map.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -63,7 +63,7 @@ class MapTests: XCTestCase {
 
         let actual: [Byte] = try value.pack()
 
-        let unpackedValue = try Map.unpack(actual)
+        let unpackedValue = try Map.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 

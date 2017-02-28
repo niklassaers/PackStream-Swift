@@ -12,7 +12,7 @@ class StructureTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Structure.unpack(actual)
+        let unpackedValue = try Structure.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -24,7 +24,7 @@ class StructureTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Structure.unpack(actual)
+        let unpackedValue = try Structure.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -37,7 +37,7 @@ class StructureTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Structure.unpack(actual)
+        let unpackedValue = try Structure.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -50,7 +50,7 @@ class StructureTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Structure.unpack(actual)
+        let unpackedValue = try Structure.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 
@@ -63,7 +63,7 @@ class StructureTests: XCTestCase {
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
 
-        let unpackedValue = try Structure.unpack(actual)
+        let unpackedValue = try Structure.unpack(actual[0..<actual.count])
         XCTAssertEqual(value, unpackedValue)
     }
 

@@ -3,7 +3,7 @@ import Foundation
 public struct Structure {
     public let signature: UInt8
     public let items: [PackProtocol]
-    
+
     public init(signature: UInt8, items: [PackProtocol]) {
         self.signature = signature
         self.items = items
@@ -12,20 +12,12 @@ public struct Structure {
 
 extension Structure: PackProtocol {
 
-
     struct Constants {
-        static let shortStructureMinMarker:   Byte = 0xB0
-        static let shortStructureMaxMarker:   Byte = 0xBF
+        static let shortStructureMinMarker: Byte = 0xB0
+        static let shortStructureMaxMarker: Byte = 0xBF
 
-        static let eightBitByteMarker:     Byte = 0xDC
-        static let sixteenBitByteMarker:   Byte = 0xDD
-    }
-    
-    struct Types {
-        static let nodes: Byte = 0x4E
-        static let relationship: Byte = 0x52
-        static let path: Byte = 0x50
-        static let unboundRelationship: Byte = 0x72
+        static let eightBitByteMarker: Byte = 0xDC
+        static let sixteenBitByteMarker: Byte = 0xDD
     }
 
     public func pack() throws -> [Byte] {
@@ -49,25 +41,27 @@ extension Structure: PackProtocol {
         }
     }
 
-    public static func unpack(_ bytes: [Byte]) throws -> Structure {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Structure {
 
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
 
         let size: UInt64
-        var position: Int
+        var position: Int = bytes.startIndex
 
         switch firstByte {
         case Constants.shortStructureMinMarker...Constants.shortStructureMaxMarker:
             size = UInt64(firstByte - Constants.shortStructureMinMarker)
-            position = 1
+            position += 1
         case Constants.eightBitByteMarker:
-            size = UInt64(try UInt8.unpack([bytes[1]]))
-            position = 2
+            size = UInt64(try UInt8.unpack([bytes[bytes.startIndex + 1]]))
+            position += 2
         case Constants.sixteenBitByteMarker:
-            size = UInt64(try UInt16.unpack(Array(bytes[1...2])))
-            position = 3
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            size = UInt64(try UInt16.unpack(bytes[start...end]))
+            position += 3
         default:
             throw UnpackError.incorrectValue
         }
@@ -93,44 +87,44 @@ extension Structure: PackProtocol {
                 item = try Int8.unpack([markerByte])
                 position += 1
             case .int8:
-                item = try Int8.unpack(Array(bytes[position...(position+1)]))
+                item = try Int8.unpack(bytes[position...(position + 1)])
                 position += 2
             case .int16:
-                item = try Int16.unpack(Array(bytes[position...(position+2)]))
+                item = try Int16.unpack(bytes[position...(position + 2)])
                 position += 3
             case .int32:
-                item = try Int32.unpack(Array(bytes[position...(position+4)]))
+                item = try Int32.unpack(bytes[position...(position + 4)])
                 position += 5
             case .int64:
-                item = try Int32.unpack(Array(bytes[position...(position+8)]))
+                item = try Int32.unpack(bytes[position...(position + 8)])
                 position += 9
             case .float:
-                item = try Double.unpack(Array(bytes[position...(position+8)]))
+                item = try Double.unpack(bytes[position...(position + 8)])
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
+                let sizeBytes = bytes[position..<(position + length)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
-                item = try String.unpack(Array(bytes[position..<(position+markerLength+size)]))
+                item = try String.unpack(bytes[position..<(position + markerLength + size)])
                 position += markerLength + size
             case .list:
-                let sizeBytes = bytes[position..<(bytes.count)]
+                let sizeBytes = bytes[position..<(bytes.endIndex)]
                 let size = try List.sizeFor(bytes: sizeBytes)
-                item = try List.unpack(Array(sizeBytes))
+                item = try List.unpack(sizeBytes)
                 position += size
             case .map:
-                let sizeBytes = bytes[position..<bytes.count]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Map.sizeFor(bytes: sizeBytes)
                 let markerLength = try Map.markerSizeFor(bytes: sizeBytes)
-                item = try Map.unpack(Array(bytes[position..<(position+size)]))
+                item = try Map.unpack(bytes[position..<bytes.endIndex])
                 position += size + markerLength
             case .structure:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position+length)]
+                let sizeBytes = bytes[position..<(position + length)]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
                 let markerLength = try Structure.markerSizeFor(bytes: sizeBytes)
-                item = try Structure.unpack(Array(bytes[position..<(position+size)]))
+                item = try Structure.unpack(bytes[position..<(position + size)])
                 position += size + markerLength
             }
 
@@ -139,12 +133,12 @@ extension Structure: PackProtocol {
 
         return Structure(signature: signature, items: items)
     }
-    
+
     static func markerSizeFor(bytes: ArraySlice<Byte>) throws -> Int {
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
-        
+
         switch firstByte {
         case Constants.shortStructureMinMarker...Constants.shortStructureMaxMarker:
             return 1
@@ -152,7 +146,7 @@ extension Structure: PackProtocol {
             return 2
         case Constants.sixteenBitByteMarker:
             return 3
-            
+
         default:
             throw UnpackError.unexpectedByteMarker
         }
@@ -170,17 +164,21 @@ extension Structure: PackProtocol {
             numberOfItems = Int(firstByte) - Int(Constants.shortStructureMinMarker)
             position += 1
         case Constants.eightBitByteMarker:
-            numberOfItems = Int(try UInt8.unpack(Array(bytes[1..<2])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 2
+            numberOfItems = Int(try UInt8.unpack(bytes[start..<end]))
             position += 2
         case Constants.sixteenBitByteMarker:
-            numberOfItems = Int(try UInt16.unpack(Array(bytes[1..<3])))
+            let start = bytes.startIndex + 1
+            let end = bytes.startIndex + 3
+            numberOfItems = Int(try UInt16.unpack(bytes[start..<end]))
             position += 3
         default:
             throw UnpackError.unexpectedByteMarker
         }
-        
+
         position += 1  // One byte for signature
-        
+
         for _ in 0..<numberOfItems {
             let markerByte = bytes[position]
             switch Packer.Representations.typeFrom(representation: markerByte) {
@@ -202,7 +200,7 @@ extension Structure: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try String.sizeFor(bytes: bytes[position...(position+length)])
+                let size = try String.sizeFor(bytes: bytes[position...(position + length)])
                 position += size
             case .list:
                 let sizeBytes = bytes[position..<bytes.endIndex]
@@ -225,85 +223,85 @@ extension Structure: PackProtocol {
 }
 
 extension Structure: Equatable {
-    
+
     public static func ==(lhs: Structure, rhs: Structure) -> Bool {
         if lhs.signature != rhs.signature {
             return false
         }
-        
+
         if lhs.items.count != rhs.items.count {
             return false
         }
-        
+
         for i in 0..<lhs.items.count {
             let lht = type(of: lhs.items[i])
             let rht = type(of: rhs.items[i])
             if lht != rht {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int8,
                 let r = rhs.items[i] as? Int8,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int16,
                 let r = rhs.items[i] as? Int16,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int32,
                 let r = rhs.items[i] as? Int32,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Int64,
                 let r = rhs.items[i] as? Int64,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Bool,
                 let r = rhs.items[i] as? Bool,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Double,
                 let r = rhs.items[i] as? Double,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? String,
                 let r = rhs.items[i] as? String,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? List,
                 let r = rhs.items[i] as? List,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Map,
                 let r = rhs.items[i] as? Map,
                 l != r {
                 return false
             }
-            
+
             if  let l = lhs.items[i] as? Structure,
                 let r = rhs.items[i] as? Structure,
                 l != r {
                 return false
             }
         }
-        
+
         return true
     }
-    
+
 }
