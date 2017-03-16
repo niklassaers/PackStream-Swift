@@ -5,9 +5,14 @@ import Foundation
 let wordSize = __WORDSIZE // needed to suprress warnings
 
 public func arc4random <T: ExpressibleByIntegerLiteral> (_ type: T.Type) -> T {
-    var r: T = 0
-    arc4random_buf(&r, Int(MemoryLayout<T>.size))
-    return r
+    #if os(Linux)
+        let size = UInt64(MemoryLayout<T>.size)
+        return UInt64(random()) % size as! T
+    #else
+        var r: T = 0
+        arc4random_buf(&r, Int(MemoryLayout<T>.size))
+        return r
+    #endif
 }
 
 public extension UInt {
@@ -22,38 +27,59 @@ public extension UInt {
 
 public extension Int {
     public static func random(_ lower: Int = min, upper: Int = max) -> Int {
-        switch (wordSize) {
-        case 32: return Int(Int32.random(Int32(lower), upper: Int32(upper)))
-        case 64: return Int(Int64.random(Int64(lower), upper: Int64(upper)))
-        default: return lower
-        }
+        #if os(Linux)
+            return (random() % (upper)) + lower
+        #else
+            switch (wordSize) {
+            case 32: return Int(Int32.random(Int32(lower), upper: Int32(upper)))
+            case 64: return Int(Int64.random(Int64(lower), upper: Int64(upper)))
+            default: return lower
+            }
+        #endif
     }
 }
 
 public extension Int8 {
     public static func random(_ lower: Int8 = min, upper: Int8 = max) -> Int8 {
-        let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
-        return Int8(Int64(r) + Int64(lower))
+        #if os(Linux)
+            return (random() % (upper)) + lower
+        #else
+            let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
+            return Int8(Int64(r) + Int64(lower))
+        #endif
     }
 }
 
 public extension Int16 {
     public static func random(_ lower: Int16 = min, upper: Int16 = max) -> Int16 {
-        let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
-        return Int16(Int64(r) + Int64(lower))
+        #if os(Linux)
+            return (random() % (upper)) + lower
+        #else
+            let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
+            return Int16(Int64(r) + Int64(lower))
+        #endif
     }
 }
 
 public extension UInt32 {
     public static func random(_ lower: UInt32 = min, upper: UInt32 = max) -> UInt32 {
-        return arc4random_uniform(upper - lower) + lower
+        #if os(Linux)
+            return (random() % (upper)) + lower
+        #else
+            return arc4random_uniform(upper - lower) + lower
+            
+        #endif
     }
 }
 
 public extension Int32 {
     public static func random(_ lower: Int32 = min, upper: Int32 = max) -> Int32 {
-        let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
-        return Int32(Int64(r) + Int64(lower))
+        #if os(Linux)
+            return (random() % (upper)) + lower
+        #else
+            let r = arc4random_uniform(UInt32(Int64(upper) - Int64(lower)))
+            return Int32(Int64(r) + Int64(lower))
+        #endif
     }
 }
 

@@ -1,5 +1,13 @@
 import XCTest
-import Darwin
+
+#if os(Linux)
+    import Glibc
+    let DBL_MIN = -1000.0 //TODO: How do I get min/max of Double on Linux?
+    let DBL_MAX = 1000.0
+#else
+    import Darwin
+#endif
+
 @testable import packstream_swift
 
 
