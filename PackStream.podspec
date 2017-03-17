@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "PackStream"
-  s.version      = "0.1.2"
+  s.version      = "0.1.3"
   s.summary      = "PackStream implementation in Swift"
 
   # This description is used to generate tags and improve search results.
@@ -27,7 +27,7 @@ This implementation is written in Swift, primarily as a dependency for the Swift
   s.watchos.deployment_target = "3.0"
   s.tvos.deployment_target = "10.0"
 
-  s.source       = { :git => "https://github.com/niklassaers/PackStream-Swift.git" }
+  s.source       = { :git => "https://github.com/niklassaers/PackStream-Swift.git", :tag => "#{s.version}" }
   s.source_files  = "Sources"
 
 end
