@@ -25,7 +25,7 @@ extension String: PackProtocol {
             }
         }
 
-        let n = bytes.count
+        let n = UInt(bytes.count)
 
         if n == 0 {
             return [ 0x80 ]

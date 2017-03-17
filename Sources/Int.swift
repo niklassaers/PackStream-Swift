@@ -235,20 +235,36 @@ extension Int: PackProtocol {
 
     public func pack() throws -> [Byte] {
 
-        switch self {
-        case -0x10 ... 0x7F:
-            return try Int8(self).pack()
-        case -0x7F ..< -0x7F:
-            return try Int8(self).pack()
-        case -0x8000 ..< 0x8000:
-            return try Int16(self).pack()
-        case -0x80000000 ..< 0x80000000:
-            return try Int32(self).pack()
-        case -0x8000000000000000 ... (0x800000000000000 - 1):
-            return try Int64(self).pack()
-        default:
-            throw PackError.notPackable
-        }
+        #if __LP64__
+
+            switch self {
+            case -0x10 ... 0x7F:
+                return try Int8(self).pack()
+            case -0x7F ..< -0x7F:
+                return try Int8(self).pack()
+            case -0x8000 ..< 0x8000:
+                return try Int16(self).pack()
+            case -0x80000000 ... 0x7fffffff:
+                return try Int32(self).pack()
+            case -0x8000000000000000 ... (0x800000000000000 - 1):
+                return try Int64(self).pack()
+            default:
+                throw PackError.notPackable
+            }
+        #else
+            switch self {
+            case -0x10 ... 0x7F:
+                return try Int8(self).pack()
+            case -0x7F ..< -0x7F:
+                return try Int8(self).pack()
+            case -0x8000 ..< 0x8000:
+                return try Int16(self).pack()
+            case -0x80000000 ... 0x7fffffff:
+                return try Int32(self).pack()
+            default:
+                throw PackError.notPackable
+            }
+        #endif
     }
 
     public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Int {

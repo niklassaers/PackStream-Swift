@@ -27,7 +27,7 @@ extension Map: PackProtocol {
             return keyBytes + valueBytes
         }).reduce([Byte](), { $0 + $1 })
 
-        switch dictionary.count {
+        switch UInt(dictionary.count) {
         case 0:
             return [ Constants.shortMapMinMarker ]
 

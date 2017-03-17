@@ -29,7 +29,7 @@ extension List: PackProtocol {
 
     public func pack() throws -> [Byte] {
 
-        switch items.count {
+        switch UInt(items.count) {
         case 0:
             return [ Constants.shortListMinMarker ]
         case 1...15:
