@@ -8,7 +8,7 @@ import XCTest
     import Darwin
 #endif
 
-@testable import packstream_swift
+@testable import PackStream
 
 
 class FloatTests: XCTestCase {

@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import packstream_swift
+@testable import PackStream
 
 class FullTests: XCTestCase {
     

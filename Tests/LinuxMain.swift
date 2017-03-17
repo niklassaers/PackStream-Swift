@@ -1,9 +1,9 @@
 import XCTest
 
-import packstream_swiftTests
+import PackStreamTests
 
 var tests = [XCTestCaseEntry]()
-tests += packstream_swiftTests.allTests()
+tests += PackStreamTests.allTests()
 
 XCTMain(tests)
 
