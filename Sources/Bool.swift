@@ -17,18 +17,17 @@ extension Bool: PackProtocol {
 
     public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Bool {
 
-        if bytes.count != 1 {
+        guard bytes.count == 1,
+              let byte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
 
-        if let byte = bytes.first {
-            if byte == Constants.byteForTrue {
-                return true
-            }
-
-            if byte == Constants.byteForFalse {
-                return false
-            }
+        if byte == Constants.byteForTrue {
+            return true
+        }
+        
+        if byte == Constants.byteForFalse {
+            return false
         }
 
         throw UnpackError.incorrectValue
