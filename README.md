@@ -8,6 +8,12 @@ This implementation is written in Swift, primarily as a dependency for the Swift
 Through PackStream you can encode Bool, Int, Float (Double in Swift lingo), String, List, Map and Structure. They all implement the `PackProtocol`, so if you want to have a collection of packable items, you can specify them as implementing PackProtocol. 
 
 ### Example
+First, remember to
+```swift
+import PackStream
+```
+
+Then you can use it, like for instance so:
 
 ```swift
 let map = Map(dictionary: [
