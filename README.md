@@ -90,3 +90,6 @@ And Carthage is now set up. You can now do
 carthage build
 ```
 and you should find a build for macOS, iOS, tvOS and watchOS in Carthage/Build
+
+## Protocol documentation
+For reference, please see [driver.py](https://github.com/neo4j-contrib/boltkit/blob/master/boltkit/driver.py) in [Boltkit](https://github.com/neo4j-contrib/boltkit)
