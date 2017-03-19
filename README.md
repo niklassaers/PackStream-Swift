@@ -26,6 +26,16 @@ let result = try map.pack()
 let restored = try Map.unpack(result)
 ```
 
+A list of the numbers 1 to 40
+```swift
+let items = Array(Int8(1)...Int8(40))
+let value = List(items: items)
+```
+gets encoded to the following bytes
+```
+D4:28:01:02:03:04:05:06:07:08:09:0A:0B:0C:0D:0E:0F:10:11:12:13:14:15:16:17:18:19:1A:1B:1C:1D:1E:1F:20:22:23:24:25:26:27:28
+```
+
 ## Getting started
 
 To use directly with Xcode, type "swift package generate-xcodeproj"
