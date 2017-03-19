@@ -63,7 +63,7 @@ class MapTests: XCTestCase {
         XCTAssertNotEqual(0, result.count)
         XCTAssertNotNil(result)
         
-        let restored = try Map.unpack(result[0..<result.count])
+        let restored = try Map.unpack(result)
         guard let fourtyTwo = restored.dictionary["alpha"] as? Int8 else { XCTFail(); return }
         XCTAssertEqual(42, fourtyTwo)
         

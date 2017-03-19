@@ -24,6 +24,10 @@ public enum PackProtocolError: Error {
 }
 
 public extension PackProtocol {
+    
+    public static func unpack(_ bytes: [Byte]) throws -> Self {
+        return try unpack(bytes[0..<bytes.count])
+    }
 
     public func asUInt64() -> UInt64? {
 

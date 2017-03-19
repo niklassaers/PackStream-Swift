@@ -23,7 +23,7 @@ let map = Map(dictionary: [
     "delta": List(items: [1,2,3,4])
     ])
 let result = try map.pack()
-let restored = try Map.unpack(result[0..<result.count])
+let restored = try Map.unpack(result)
 ```
 
 ## Getting started
