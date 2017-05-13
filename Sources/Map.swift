@@ -437,3 +437,21 @@ extension Dictionary {
         return dict
     }
 }
+
+extension Dictionary: PackProtocol  {
+
+    public func pack() throws -> [Byte] {
+        if let dict = self as? [String:PackProtocol] {
+           let map = Map(dictionary: dict)
+            return try map.pack()
+        } else {
+            throw PackError.notPackable
+        }
+    }
+
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Dictionary {
+        let map = try Map.unpack(bytes)
+        return map.dictionary as! Dictionary<Key, Value>
+    }
+
+}

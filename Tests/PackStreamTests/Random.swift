@@ -67,7 +67,7 @@ public extension UInt32 {
             return (random() % (upper)) + lower
         #else
             return arc4random_uniform(upper - lower) + lower
-            
+
         #endif
     }
 }

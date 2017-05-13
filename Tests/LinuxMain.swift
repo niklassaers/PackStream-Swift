@@ -6,4 +6,3 @@ var tests = [XCTestCaseEntry]()
 tests += PackStreamTests.allTests()
 
 XCTMain(tests)
-

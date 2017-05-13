@@ -80,6 +80,17 @@ class ListTests: XCTestCase {
         XCTAssertEqual(value, unpackedValue)
     }
 
+    func testWithRandomJSON() throws { // from http://www.json-generator.com
+        let testPath = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent().path
+        let filePath = "\(testPath)/random.json"
+        let jsonData = try String.init(contentsOfFile: filePath, encoding: .utf8).data(using: .utf8)!
+        let json = try JSONSerialization.jsonObject(with: jsonData, options: [])
+        let array = json as! [PackProtocol]
+        let bytes = try array.pack()
+        XCTAssertNotNil(bytes)
+    }
+
     static var allTests : [(String, (ListTests) -> () throws -> Void)] {
         return [
             ("testEmptyList", testEmptyList),
@@ -88,6 +99,88 @@ class ListTests: XCTestCase {
             ("testTheeHetrogenousTypes", testTheeHetrogenousTypes),
             ("testListOf256Ones", testListOf256Ones),
             ("testListOf65536Ones", testListOf65536Ones),
+            ("testWithRandomJSON", testWithRandomJSON),
         ]
     }
+}
+
+extension NSArray {
+    func toPackProtocol() -> [PackProtocol] {
+        let array = self.flatMap { (item) -> PackProtocol? in
+            if let i = item as? String {
+                return i
+            } else if let i = item as? NSArray {
+                return i.toPackProtocol()
+            } else if let i = item as? NSDictionary {
+                return i.toPackProtocol()
+            } else if let i = item as? Double {
+                return i
+            } else if let i = item as? Bool {
+                return i
+            } else if let i = item as? Int {
+                return i
+            }
+
+            print("Not converting \(item) of type \(type(of: item))")
+            return nil
+        }
+
+        return array
+    }
+}
+
+extension NSDictionary: PackProtocol {
+    func toPackProtocol() -> [String:PackProtocol] {
+        var dict = [String:PackProtocol]()
+
+        for (key, value) in self {
+            let key = key as! String
+            if let v = value as? NSArray {
+                dict[key] = v.toPackProtocol()
+            } else if let v = value as? NSDictionary {
+                dict[key] = v.toPackProtocol()
+            } else if let v = value as? String {
+                dict[key] = v
+            } else if let v = value as? Double {
+                dict[key] = v
+            } else if let v = value as? Bool {
+                dict[key] = v
+            } else if let v = value as? Int {
+                dict[key] = v
+            } else {
+                print("Not converting \(value) of type \(type(of: value))")
+            }
+        }
+
+        return dict
+    }
+
+    public func pack() throws -> [Byte] {
+
+        let dict = self.toPackProtocol()
+        let map = Map(dictionary: dict)
+        return try map.pack()
+    }
+
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Self {
+        return [:] // We're not using this
+    }
+}
+
+
+ extension NSArray: PackProtocol {
+
+    public func pack() throws -> [Byte] {
+        if let array = self as? [PackProtocol] {
+            let list = List(items: array)
+            return try list.pack()
+        } else {
+            throw PackError.notPackable
+        }
+    }
+
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Self {
+        return [] // We're not using this
+    }
+
 }

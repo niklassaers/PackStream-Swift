@@ -309,3 +309,21 @@ extension List: Equatable {
     }
 
 }
+
+extension Array: PackProtocol {
+
+    public func pack() throws -> [Byte] {
+        if let array = self as? [PackProtocol] {
+            let list = List(items: array)
+            return try list.pack()
+        } else {
+            throw PackError.notPackable
+        }
+    }
+
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Array {
+        let list = try List.unpack(bytes)
+        return list.items as! Array<Element>
+    }
+
+}

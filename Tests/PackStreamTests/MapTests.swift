@@ -50,7 +50,7 @@ class MapTests: XCTestCase {
 
         try performTestWith(itemCount: 256)
     }
-    
+
     func testForFun() throws {
         let map = Map(dictionary: [
             "alpha": 42,
@@ -59,14 +59,14 @@ class MapTests: XCTestCase {
             "delta": List(items: [1,2,3,4])
             ])
         let result = try map.pack()
-        
+
         XCTAssertNotEqual(0, result.count)
         XCTAssertNotNil(result)
-        
+
         let restored = try Map.unpack(result)
         guard let fourtyTwo = restored.dictionary["alpha"] as? Int8 else { XCTFail(); return }
         XCTAssertEqual(42, fourtyTwo)
-        
+
     }
 
     private func performTestWith(itemCount: Int) throws {

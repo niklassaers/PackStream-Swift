@@ -25,7 +25,7 @@ extension Bool: PackProtocol {
         if byte == Constants.byteForTrue {
             return true
         }
-        
+
         if byte == Constants.byteForFalse {
             return false
         }
