@@ -81,5 +81,14 @@ public extension PackProtocol {
 
         return nil
     }
+}
 
+public extension Int {
+    init?(_ value: PackProtocol) {
+        if let n = value.asUInt64() {
+            self.init(n)
+        } else {
+            return nil
+        }
+    }
 }
