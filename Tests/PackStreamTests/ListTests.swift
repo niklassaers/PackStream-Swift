@@ -171,13 +171,21 @@ extension NSDictionary: PackProtocol {
  extension NSArray: PackProtocol {
 
     public func pack() throws -> [Byte] {
-        if  let anyArray = self as? Array<NSObject>,
-            let array = anyArray as? [PackProtocol] {
-            let list = List(items: array)
-            return try list.pack()
-        } else {
+        
+        let array = self.flatMap { (obj) -> PackProtocol? in
+            if let p = obj as? PackProtocol {
+                return p
+            } else {
+                return nil
+            }
+        }
+        
+        if array.count != self.count {
             throw PackError.notPackable
         }
+        
+        let list = List(items: array)
+        return try list.pack()
     }
 
     public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Self {
