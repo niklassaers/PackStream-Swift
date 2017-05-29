@@ -235,7 +235,7 @@ extension Int: PackProtocol {
 
     public func pack() throws -> [Byte] {
 
-        #if __LP64__
+        #if __LP64__ || os(Linux)
 
             switch self {
             case -0x10 ... 0x7F:
