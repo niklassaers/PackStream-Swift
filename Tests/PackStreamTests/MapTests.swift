@@ -74,7 +74,7 @@ class MapTests: XCTestCase {
         var dict = [String:Int]()
         for _ in 0..<itemCount {
             let uuid = UUID()
-            dict[uuid.uuidString] = uuid.hashValue
+            dict[uuid.uuidString] = uuid.hashValue % Int(Int16.max)
         }
 
         let value = Map(dictionary: dict)
