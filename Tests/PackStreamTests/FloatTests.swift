@@ -15,7 +15,7 @@ class FloatTests: XCTestCase {
 
     func testMin() throws {
 
-        let value = DBL_MIN
+        let value = Double.leastNormalMagnitude
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
@@ -25,7 +25,7 @@ class FloatTests: XCTestCase {
 
     func testMax() throws {
 
-        let value = DBL_MAX
+        let value = Double.greatestFiniteMagnitude
         let bytes = try value.pack()
         XCTAssertEqual(9, bytes.count)
 
