@@ -78,9 +78,11 @@ class StringTests: XCTestCase {
 
         let value = String.init(repeating: "A", count: 65536)
 
-        let expected = [Byte(0xD2), Byte(0x00), Byte(0x01), Byte(0x00), Byte(0x00)] + (0...65535).map { (_) -> Byte in
+        let expected_part1 = [Byte(0xD2), Byte(0x00), Byte(0x01), Byte(0x00), Byte(0x00)] 
+        let expected_part2 = (0...65535).map { (_) -> Byte in
             return Byte(0x41)
         }
+        let expected = expected_part1 + expected_part2
 
         let actual: [Byte] = try value.pack()
         XCTAssertEqual(expected, actual)
