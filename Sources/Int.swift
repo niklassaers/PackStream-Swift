@@ -285,7 +285,7 @@ extension Int: PackProtocol {
         }
     }
 
-    static func readInteger<T: Integer>(data: NSData, start: Int) -> T {
+    static func readInteger<T: BinaryInteger>(data: NSData, start: Int) -> T {
         var d: T = 0
         data.getBytes(&d, range: NSRange(location: start, length: MemoryLayout<T>.size))
         return d
