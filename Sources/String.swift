@@ -25,7 +25,7 @@ extension String: PackProtocol {
             }
         }
 
-        let n = UInt64(bytes.count)
+        let n = UInt(bytes.count)
 
         if n == 0 {
             return [ 0x80 ]
@@ -35,7 +35,7 @@ extension String: PackProtocol {
             return try pack8BitString(bytes)
         } else if n <= 65535 {
             return try pack16BitString(bytes)
-        } else if n <= 4294967295 {
+        } else if n <= 4294967295 as UInt {
             return try pack32BitString(bytes)
         }
 
