@@ -171,7 +171,7 @@ extension NSDictionary: PackProtocol {
  extension NSArray: PackProtocol {
 
     public func pack() throws -> [Byte] {
-        
+
         let array = self.flatMap { (obj) -> PackProtocol? in
             if let p = obj as? PackProtocol {
                 return p
@@ -179,11 +179,11 @@ extension NSDictionary: PackProtocol {
                 return nil
             }
         }
-        
+
         if array.count != self.count {
             throw PackError.notPackable
         }
-        
+
         let list = List(items: array)
         return try list.pack()
     }
