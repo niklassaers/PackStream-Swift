@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "PackStream"
-  s.version      = "0.8.3"
+  s.version      = "0.9.0"
   s.summary      = "PackStream implementation in Swift"
 
   # This description is used to generate tags and improve search results.
