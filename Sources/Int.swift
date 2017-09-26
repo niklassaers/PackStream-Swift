@@ -1,5 +1,10 @@
 import Foundation
 
+#if swift(>=4.0)
+#elseif swift(>=3.0)
+typealias BinaryInteger = Integer
+#endif
+
 extension Int8: PackProtocol {
     struct Constants {
         static let byteMarker: Byte = 0xC8
@@ -285,8 +290,8 @@ extension Int: PackProtocol {
         }
     }
 
-    static func readInteger<T: Integer>(data: NSData, start: Int) -> T {
-        var d: T = 0
+    static func readInteger<T: BinaryInteger>(data: NSData, start: Int) -> T {
+        var d: T = 0 as T
         data.getBytes(&d, range: NSRange(location: start, length: MemoryLayout<T>.size))
         return d
     }
