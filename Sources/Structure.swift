@@ -200,8 +200,10 @@ extension Structure: PackProtocol {
                 position += 9
             case .string:
                 let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try String.sizeFor(bytes: bytes[position...(position + length)])
-                position += size
+                let sizeBytes = bytes[position..<(position + length)]
+                let size = try String.sizeFor(bytes: sizeBytes)
+                let markerLength = try String.markerSizeFor(bytes: sizeBytes)
+                position += markerLength + size
             case .list:
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try List.sizeFor(bytes: sizeBytes)
