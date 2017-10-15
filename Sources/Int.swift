@@ -5,6 +5,38 @@ import Foundation
 typealias BinaryInteger = Integer
 #endif
 
+extension PackProtocol {
+    public func intValue() -> Int64? {
+        if let i = self as? Int8 {
+            return Int64(i)
+        } else if let i = self as? Int16 {
+            return Int64(i)
+        } else if let i = self as? Int32 {
+            return Int64(i)
+        } else if let i = self as? Int64 {
+            return i
+        } else if let i = self as? UInt8 {
+            return Int64(i)
+        } else if let i = self as? UInt16 {
+            return Int64(i)
+        } else if let i = self as? UInt32 {
+            return Int64(i)
+        }
+
+        return nil
+    }
+
+    public func uintValue() -> UInt64? {
+        if let i = self as? UInt64 {
+            return i
+        } else if let i = self.intValue() {
+            return UInt64(i)
+        }
+
+        return nil
+    }
+}
+
 extension Int8: PackProtocol {
     struct Constants {
         static let byteMarker: Byte = 0xC8
