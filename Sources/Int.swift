@@ -30,7 +30,11 @@ extension PackProtocol {
         if let i = self as? UInt64 {
             return i
         } else if let i = self.intValue() {
-            return UInt64(i)
+            if i < 0 {
+                return nil
+            } else {
+                return UInt64(i)
+            }
         }
 
         return nil
