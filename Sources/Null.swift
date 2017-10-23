@@ -1,6 +1,6 @@
 import Foundation
 
-struct Null {}
+public struct Null {}
 
 extension Null : PackProtocol {
 
@@ -8,11 +8,11 @@ extension Null : PackProtocol {
         static let byteMarker: Byte = 0xC0
     }
 
-    func pack() throws -> [Byte] {
+    public func pack() throws -> [Byte] {
         return [ Constants.byteMarker ]
     }
 
-    static func unpack(_ bytes: ArraySlice<Byte>) throws -> Null {
+    public static func unpack(_ bytes: ArraySlice<Byte>) throws -> Null {
         if bytes.count != 1 {
             throw UnpackError.incorrectNumberOfBytes
         }
