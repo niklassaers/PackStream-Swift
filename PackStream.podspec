@@ -1,14 +1,9 @@
 Pod::Spec.new do |s|
 
   s.name         = "PackStream"
-  s.version      = "0.9.5"
+  s.version      = "0.9.6"
   s.summary      = "PackStream implementation in Swift"
 
-  # This description is used to generate tags and improve search results.
-  #   * Think: What does it do? Why did you write it? What is the focus?
-  #   * Try to keep it short, snappy and to the point.
-  #   * Write the description between the DESC delimiters below.
-  #   * Finally, don't worry about the indent, CocoaPods strips it!
   s.description  = <<-DESC
 PackStream is a binary message format very similar to [MessagePack](http://msgpack.org). It can be used stand-alone, but it has been built as a message format for use in the Bolt protocol to communicate between the Neo4j server and its clients.
 
