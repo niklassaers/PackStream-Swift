@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "PackStream"
-  s.version      = "0.9.6"
+  s.version      = "0.9.7"
   s.summary      = "PackStream implementation in Swift"
 
   s.description  = <<-DESC
@@ -17,10 +17,10 @@ This implementation is written in Swift, primarily as a dependency for the Swift
 
   s.license      = { :type => "BSD", :file => "LICENSE" }
 
-  s.ios.deployment_target = "10.0"
-  s.osx.deployment_target = "10.12"
-  s.watchos.deployment_target = "3.0"
-  s.tvos.deployment_target = "10.0"
+  s.ios.deployment_target = "8.0"
+  s.osx.deployment_target = "10.9"
+  s.watchos.deployment_target = "2.0"
+  s.tvos.deployment_target = "9.0"
 
   s.source       = { :git => "https://github.com/niklassaers/PackStream-Swift.git", :tag => "#{s.version}" }
   s.source_files  = "Sources"
