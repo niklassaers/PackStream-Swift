@@ -1,6 +1,8 @@
 import Foundation
 
-public struct Null {}
+public struct Null {
+    public init() {}
+}
 
 extension Null : PackProtocol {
 
