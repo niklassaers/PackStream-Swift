@@ -112,26 +112,32 @@ extension List: PackProtocol {
                 item = try Double.unpack(bytes[position...(position + 8)])
                 position += 9
             case .string:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position..<(position + length)]
+//                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
+//                let sizeBytes = bytes[position..<(position + length)]
+                let sizeBytes = bytes[position..<(bytes.endIndex)]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
                 item = try String.unpack(bytes[position..<(position + markerLength + size)])
                 position += markerLength + size
             case .list:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try List.sizeFor(bytes: bytes[position..<(position + length)])
-                item = try List.unpack(bytes[position..<(position + size)])
+//                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
+//                let size = try List.sizeFor(bytes: bytes[position..<(position + length)])
+                let size = try List.sizeFor(bytes: bytes[position..<(bytes.endIndex)])
+//                item = try List.unpack(bytes[position..<(position + size)])
+                item = try List.unpack(bytes[position..<(bytes.endIndex)])
                 position += size
             case .map:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let size = try Map.sizeFor(bytes: bytes[position..<(position + length)])
-                item = try Map.unpack(bytes[position..<(position + size)])
+//                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
+//                let size = try Map.sizeFor(bytes: bytes[position..<(position + length)])
+                let size = try Map.sizeFor(bytes: bytes[position..<(bytes.endIndex)])
+//                item = try Map.unpack(bytes[position..<(position + size)])
+                item = try Map.unpack(bytes[position..<(bytes.endIndex)])
                 position += size
             case .structure:
                 let sizeBytes = bytes[position..<(bytes.endIndex)]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
-                item = try Structure.unpack(bytes[position..<(position + size)])
+//                item = try Structure.unpack(bytes[position..<(position + size)])
+                item = try Structure.unpack(bytes[position..<(bytes.endIndex)])
                 position += size
             }
 

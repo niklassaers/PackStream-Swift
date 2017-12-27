@@ -140,7 +140,11 @@ extension String: PackProtocol {
     private static func unpackShortString(_ bytes: ArraySlice<Byte>) throws -> String {
 
         let size = bytes[bytes.startIndex] - Constants.shortStringMinMarker
+        let start = bytes.startIndex + 1
+
         if bytes.count != Int(size) + 1 {
+            let alt = try bytesToString(Array(bytes[start..<bytes.endIndex]))
+            print("Found \(alt)")
             throw UnpackError.incorrectNumberOfBytes
         }
 
@@ -148,7 +152,6 @@ extension String: PackProtocol {
             return ""
         }
 
-        let start = bytes.startIndex + 1
         let end = bytes.endIndex
         return try bytesToString(Array(bytes[start..<end]))
     }

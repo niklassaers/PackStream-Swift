@@ -114,22 +114,31 @@ extension Map: PackProtocol {
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerLength = try String.markerSizeFor(bytes: sizeBytes)
-                key = try String.unpack(bytes[position..<(position + markerLength + size)])
+                let end = position + markerLength + size
+                if end >= bytes.endIndex {
+                    key = try String.unpack(bytes[position..<bytes.endIndex])
+                    print("Out of bounds: \(key)")
+                } else {
+                    key = try String.unpack(bytes[position..<end])
+                }
                 position += markerLength + size
             case .list:
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try List.sizeFor(bytes: sizeBytes)
-                key = try List.unpack(bytes[position..<(position + size)])
+//                key = try List.unpack(bytes[position..<(position + size)])
+                key = try List.unpack(bytes[position..<(bytes.endIndex)])
                 position += size
             case .map:
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Map.sizeFor(bytes: sizeBytes)
-                key = try Map.unpack(bytes[position..<(position + size)])
+                key = try Map.unpack(bytes[position..<(bytes.endIndex)])
+//                key = try Map.unpack(bytes[position..<(position + size)])
                 position += size
             case .structure:
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Structure.sizeFor(bytes: sizeBytes)
-                key = try Structure.unpack(bytes[position..<(position + size)])
+                key = try Structure.unpack(bytes[position..<(bytes.endIndex)])
+//                key = try Structure.unpack(bytes[position..<(position + size)])
                 position += size
             }
 
@@ -173,7 +182,8 @@ extension Map: PackProtocol {
                 if length > 0 {
                     let size = try List.sizeFor(bytes: bytes[position..<bytes.endIndex])
                     if size > 0 {
-                        value = try List.unpack(bytes[position..<(position + size)])
+                        value = try List.unpack(bytes[position..<(bytes.endIndex)])
+//                        value = try List.unpack(bytes[position..<(position + size)])
                         position += size
                     } else {
                         value = List(items: [])
@@ -184,7 +194,8 @@ extension Map: PackProtocol {
             case .map:
                 let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try Map.sizeFor(bytes: sizeBytes)
-                value = try Map.unpack(bytes[position..<(position + size)])
+                // value = try Map.unpack(bytes[position..<(position + size)])
+                value = try Map.unpack(bytes[position..<bytes.endIndex])
                 position += size
             case .structure:
                 let sizeBytes = bytes[position..<bytes.endIndex]
@@ -197,7 +208,8 @@ extension Map: PackProtocol {
                 dictionary[key] = value
             } else {
                 // Only string as key for now, need to make those other keys serve as Map keys
-                throw UnpackError.notImplementedYet
+                dictionary["\(key)"] = value
+                // throw UnpackError.notImplementedYet
             }
 
         }
@@ -275,8 +287,7 @@ extension Map: PackProtocol {
             case .float:
                 position += 9
             case .string:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position...(position + length)]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize
@@ -316,8 +327,7 @@ extension Map: PackProtocol {
             case .float:
                 position += 9
             case .string:
-                let length = bytes.endIndex > position + 9 ? 9 : bytes.endIndex - position - 1
-                let sizeBytes = bytes[position...(position + length)]
+                let sizeBytes = bytes[position..<bytes.endIndex]
                 let size = try String.sizeFor(bytes: sizeBytes)
                 let markerSize = try String.markerSizeFor(bytes: sizeBytes)
                 position += size + markerSize
