@@ -164,7 +164,7 @@ extension Map: PackProtocol {
                 value = try Int32.unpack(bytes[position...(position + 4)])
                 position += 5
             case .int64:
-                value = try Int32.unpack(bytes[position...(position + 8)])
+                value = try Int64.unpack(bytes[position...(position + 8)])
                 position += 9
             case .float:
                 value = try Double.unpack(bytes[position...(position + 8)])
