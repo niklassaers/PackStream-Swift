@@ -71,6 +71,10 @@ extension String: PackProtocol {
     }
 
     public static func unpack(_ bytes: ArraySlice<Byte>) throws -> String {
+        if bytes.count == 0 {
+            return ""
+        }
+
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -90,6 +94,10 @@ extension String: PackProtocol {
     }
 
     static func markerSizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        if bytes.count == 0 {
+            return 0
+        }
+
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
@@ -110,6 +118,10 @@ extension String: PackProtocol {
     }
 
     static func sizeFor(bytes: ArraySlice<Byte>) throws -> Int {
+        if bytes.count == 0 {
+            return 0
+        }
+        
         guard let firstByte = bytes.first else {
             throw UnpackError.incorrectNumberOfBytes
         }
