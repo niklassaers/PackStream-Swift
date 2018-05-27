@@ -106,7 +106,7 @@ class ListTests: XCTestCase {
 
 extension NSArray {
     func toPackProtocol() -> [PackProtocol] {
-        let array = self.flatMap { (item) -> PackProtocol? in
+        let array = self.compactMap { (item) -> PackProtocol? in
             if let i = item as? String {
                 return i
             } else if let i = item as? NSArray {
@@ -172,7 +172,7 @@ extension NSDictionary: PackProtocol {
 
     public func pack() throws -> [Byte] {
 
-        let array = self.flatMap { (obj) -> PackProtocol? in
+        let array = self.compactMap { (obj) -> PackProtocol? in
             if let p = obj as? PackProtocol {
                 return p
             } else {
